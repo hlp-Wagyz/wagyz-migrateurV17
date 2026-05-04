@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wagyz — Modélisateur v17</title>
+<style>
+:root{
+  --ctp:#1a1a1a;--cts:#555;--ctt:#888;
+  --cbp:#fff;--cbs:#f5f5f5;
+  --bg-ok:#e8f7f0;--bg-wa:#fff8e6;--bg-da:#fdf0f0;--bg-inf:#e8f1fb;
+  --bd-ok:#1D9E75;--bd-wa:#EF9F27;--bd-da:#E24B4A;--bd-inf:#185FA5;
+  --tx-ok:#0F6E56;--tx-wa:#7D4A08;--tx-da:#9B1C1C;--tx-inf:#185FA5;
+  --bdt:#e8e8e8;--bds:#ccc;
+  --fn:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --rd:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--fn);background:#f0f2f5;color:var(--ctp);padding:12px;min-height:100vh}
+.app{max-width:980px;margin:0 auto;background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 20px rgba(0,0,0,.08)}
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--bdt);gap:8px;flex-wrap:wrap}
+.hdr-t{font-size:16px;font-weight:700;color:var(--ctp)}
+.hdr-s{font-size:10px;color:var(--cts);margin-top:3px;line-height:1.5}
+.nav{display:flex;border-bottom:1.5px solid var(--bdt);margin-bottom:16px;overflow-x:auto;gap:0}
+.nav button{padding:8px 12px;font-size:11px;border:none;background:none;color:var(--cts);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;font-family:var(--fn);transition:all .15s;margin-bottom:-1.5px}
+.nav button.a{color:var(--ctp);border-bottom-color:var(--bd-ok);font-weight:600}
+.nav button:hover:not(.a){color:var(--ctp);background:#f8f8f8}
+.pane{display:none}.pane.a{display:block}
+.sec{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ctt);margin:14px 0 7px;display:flex;align-items:center;gap:6px}
+.sec::after{content:'';flex:1;height:1px;background:var(--bdt)}
+/* Cards */
+.cards{display:grid;gap:8px;margin:8px 0}
+.c5{grid-template-columns:repeat(5,minmax(0,1fr))}
+.c4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.c2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:640px){.c5,.c4,.c3{grid-template-columns:repeat(2,1fr)}}
+.card{background:var(--cbs);border-radius:var(--rd);padding:11px 13px;border:1px solid transparent}
+.card.ok{background:var(--bg-ok);border-color:var(--bd-ok)}
+.card.wa{background:var(--bg-wa);border-color:var(--bd-wa)}
+.card.da{background:var(--bg-da);border-color:var(--bd-da)}
+.card.inf{background:var(--bg-inf);border-color:var(--bd-inf)}
+.card .l{font-size:9px;color:var(--ctt);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;font-weight:600}
+.card .v{font-size:20px;font-weight:700;color:var(--ctp);line-height:1}
+.card .s{font-size:10px;color:var(--cts);margin-top:3px}
+/* Badges */
+.bdg{display:inline-block;padding:2px 9px;border-radius:4px;font-size:11px;font-weight:600}
+.bg{background:var(--cbs);color:var(--cts)}
+.ok{background:var(--bg-ok);color:var(--tx-ok)}
+.wa{background:var(--bg-wa);color:var(--tx-wa)}
+.da{background:var(--bg-da);color:var(--tx-da)}
+.inf{background:var(--bg-inf);color:var(--tx-inf)}
+/* Alertes */
+.al{border-left:3px solid;padding:8px 12px;border-radius:0 6px 6px 0;font-size:11px;margin-bottom:6px;line-height:1.6}
+.al.ok{border-color:var(--bd-ok);background:var(--bg-ok);color:var(--tx-ok)}
+.al.wa{border-color:var(--bd-wa);background:var(--bg-wa);color:var(--tx-wa)}
+.al.da{border-color:var(--bd-da);background:var(--bg-da);color:var(--tx-da)}
+.al.inf{border-color:var(--bd-inf);background:var(--bg-inf);color:var(--tx-inf)}
+/* Barre de progression */
+.brow{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:11px}
+.btrk{flex:1;height:14px;background:var(--bdt);border-radius:3px;overflow:hidden;position:relative}
+.bfil{height:100%;border-radius:3px;transition:width .4s;display:flex;align-items:center;padding-left:5px;font-size:9px;color:#fff;font-weight:600;overflow:hidden;white-space:nowrap}
+.bl{width:140px;flex-shrink:0;font-weight:500}
+.bv{min-width:55px;text-align:right;font-weight:700}
+/* Import zone */
+.iz-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.iz{border:2px dashed var(--bds);border-radius:var(--rd);padding:18px 12px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--cbs)}
+.iz:hover,.iz.drag{border-color:var(--bd-inf);background:var(--bg-inf)}
+.iz.done{border-color:var(--bd-ok);border-style:solid;background:var(--bg-ok)}
+.iz input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.iz-icon{font-size:26px;margin-bottom:6px}
+.iz-lbl{font-size:12px;font-weight:600;color:var(--ctp);margin-bottom:3px}
+.iz-sub{font-size:10px;color:var(--cts);line-height:1.4}
+/* Option toggle */
+.opt-row{display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:var(--rd);border:1.5px solid var(--bds);margin-bottom:8px;cursor:pointer;transition:all .2s}
+.opt-row:hover{border-color:var(--bd-inf);background:var(--bg-inf)}
+.opt-row.active{border-color:var(--bd-ok);background:var(--bg-ok)}
+.opt-chk{width:18px;height:18px;border-radius:4px;border:2px solid var(--bds);background:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .2s}
+.opt-row.active .opt-chk{background:var(--bd-ok);border-color:var(--bd-ok);color:#fff}
+.opt-txt{flex:1}
+.opt-txt strong{font-size:12px;display:block;margin-bottom:2px}
+.opt-txt span{font-size:10px;color:var(--cts);line-height:1.4}
+/* Tableau dossiers */
+.dos-scroll{max-height:420px;overflow-y:auto;border:1px solid var(--bdt);border-radius:var(--rd);margin-top:8px}
+.dos-tbl{width:100%;border-collapse:collapse;font-size:10px}
+.dos-tbl th{text-align:left;padding:5px 8px;border-bottom:1.5px solid var(--bdt);font-weight:700;color:var(--cts);font-size:9px;text-transform:uppercase;position:sticky;top:0;background:#fff;z-index:1}
+.dos-tbl td{padding:4px 8px;border-bottom:0.5px solid var(--bdt);vertical-align:middle;line-height:1.4}
+.dos-tbl tr:hover td{background:#f8f8f8}
+.dos-tbl tr.v1 td{border-left:3px solid #1D9E75}
+.dos-tbl tr.v2 td{border-left:3px solid #185FA5}
+.dos-tbl tr.v3 td{border-left:3px solid #EF9F27}
+.dos-tbl tr.nm td{border-left:3px solid #E24B4A}
+.pill{display:inline-block;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:600;white-space:nowrap}
+.pill-ok{background:#d1fae5;color:#065f46}
+.pill-wa{background:#fef3c7;color:#92400e}
+.pill-da{background:#fee2e2;color:#7f1d1d}
+.pill-inf{background:#dbeafe;color:#1e3a8a}
+.pill-grey{background:#f3f4f6;color:#374151}
+/* Axes */
+.axes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0}
+@media(max-width:600px){.axes{grid-template-columns:1fr}}
+.axe{border-radius:var(--rd);padding:13px;border:2px solid var(--bdt);cursor:pointer;transition:all .2s;background:var(--cbp)}
+.axe.sel{border-width:2px}
+.axe-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.axe-dur{font-size:26px;font-weight:700;margin-bottom:4px}
+.axe-row{font-size:10px;color:var(--cts);margin-bottom:2px}
+.axe-bdg{display:inline-block;font-size:10px;padding:2px 9px;border-radius:8px;font-weight:600;margin-top:6px}
+/* Risques */
+.rrow{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--bdt);font-size:11px}
+.rdot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+/* Planning */
+.ph-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.ph-lbl{font-size:10px;width:170px;flex-shrink:0;color:var(--cts);line-height:1.3}
+.ph-trk{flex:1;height:22px;background:var(--bdt);border-radius:3px;position:relative;overflow:hidden}
+.ph-bar{height:100%;border-radius:3px;position:absolute;display:flex;align-items:center;padding-left:6px;font-size:9px;font-weight:600;color:#fff;overflow:hidden;white-space:nowrap}
+.m-axis{display:flex;margin-left:178px;margin-bottom:3px}
+.m-tick{flex:1;font-size:9px;color:var(--ctt);text-align:center}
+.cal-row{display:flex;gap:5px;margin:10px 0;flex-wrap:wrap}
+.cal-m{border-radius:6px;padding:7px 8px;text-align:center;min-width:52px;font-size:10px;border:1px solid var(--bdt);background:var(--cbs)}
+.jrow{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--bdt)}
+.jrow:last-child{border:none}
+.jdate{font-size:11px;font-weight:700;min-width:100px;flex-shrink:0}
+.jdot{width:11px;height:11px;border-radius:50%;flex-shrink:0;margin-top:2px}
+/* Boutons */
+.btn-primary{width:100%;padding:13px;border-radius:var(--rd);border:none;cursor:pointer;font-family:var(--fn);font-size:13px;font-weight:700;transition:opacity .2s;display:flex;align-items:center;justify-content:center;gap:8px;background:#1D9E75;color:#fff;margin-bottom:8px}
+.btn-primary:hover{opacity:.88}
+.btn-magic{background:linear-gradient(135deg,#5B3FA8,#0D6B53);font-size:14px}
+.btn-export{background:#185FA5}
+.btn-primary:active{transform:scale(.99)}
+/* Guide préparation */
+.step{display:flex;gap:12px;margin-bottom:14px;padding:12px;border-radius:var(--rd);border:1px solid var(--bdt);background:var(--cbs)}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--bd-ok);color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-body strong{font-size:12px;display:block;margin-bottom:3px}
+.step-body p{font-size:11px;color:var(--cts);line-height:1.6;margin-bottom:4px}
+.step-body code{background:#f0f0f0;padding:1px 5px;border-radius:3px;font-size:10px;font-family:monospace}
+.step-tag{display:inline-block;font-size:9px;padding:1px 7px;border-radius:8px;font-weight:600;margin-right:4px;margin-top:3px}
+/* Résumé magic */
+.mr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+@media(max-width:600px){.mr-grid{grid-template-columns:repeat(2,1fr)}}
+.mr-card{background:var(--cbp);border-radius:var(--rd);padding:10px;border:1px solid var(--bd-inf)}
+.mr-card .ml{font-size:10px;color:var(--cts);margin-bottom:3px}
+.mr-card .mv{font-size:13px;font-weight:700}
+.mr-card .mo{font-size:10px;color:var(--ctt);text-decoration:line-through;margin-top:1px}
+/* Barre de durée */
+.dur-bar{height:8px;border-radius:4px;background:var(--bdt);overflow:hidden;margin:4px 0 2px}
+.dur-fill{height:100%;border-radius:4px;transition:width .4s}
+/* Date grid */
+.date-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}
+.date-card{border:1px solid var(--bdt);border-radius:var(--rd);padding:11px}
+.date-card .dl{font-size:9px;color:var(--ctt);text-transform:uppercase;font-weight:700;margin-bottom:4px}
+.date-card input[type=date]{width:100%;padding:5px 8px;border:1px solid var(--bds);border-radius:6px;background:var(--cbp);color:var(--ctp);font-size:11px;font-family:var(--fn);margin-top:4px}
+.tline{position:relative;height:24px;border-radius:5px;background:var(--bdt);overflow:hidden;margin:8px 0}
+.tline-bar{position:absolute;height:100%;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#fff;overflow:hidden;white-space:nowrap;padding:0 6px;transition:all .3s}
+/* Tableau */
+.tbl{width:100%;border-collapse:collapse;font-size:11px}
+.tbl th{text-align:left;padding:5px 8px;border-bottom:1.5px solid var(--bdt);font-weight:700;color:var(--cts);font-size:10px;text-transform:uppercase}
+.tbl td{padding:6px 8px;border-bottom:0.5px solid var(--bdt);vertical-align:top}
+.tbl tr:last-child td{border:none}
+/* Slider row */
+.sr{display:grid;grid-template-columns:1fr;gap:4px;margin-bottom:6px}
+.sr label{font-size:11px;color:var(--cts)}
+/* Avertissement mode manuel */
+.mode-warn{background:var(--bg-wa);border:1.5px solid var(--bd-wa);border-radius:var(--rd);padding:10px 12px;font-size:11px;color:var(--tx-wa);margin-bottom:10px;display:none}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="hdr">
+  <div>
+    <div class="hdr-t">Wagyz — Modélisateur de stratégie de migration</div>
+    <div class="hdr-s">v17 · Import Silae obligatoire · Analyse combinée par dossier · Charge réelle · Vagues cohérentes · Export Excel</div>
+  </div>
+  <span class="bdg bg" id="TOP">En attente d'import</span>
+</div>
+<div class="nav">
+  <button class="a" onclick="SW('prep',this)">📋 Préparation</button>
+  <button onclick="SW('import',this)">📥 Import Silae</button>
+  <button onclick="SW('analyse',this)">🔍 Analyse</button>
+  <button onclick="SW('vagues',this)">📦 Vagues</button>
+  <button onclick="SW('equipes',this)">👥 Équipes & dates</button>
+  <button onclick="SW('strategie',this)">⚡ Stratégie</button>
+  <button onclick="SW('planning',this)">📅 Planning</button>
+  <button onclick="SW('roi',this);setTimeout(initROI,50)">💰 ROI & coût non-migration</button>
+</div>
+
+<!-- ══ PRÉPARATION ══ -->
+<div class="pane a" id="P-prep">
+  <div class="al inf" style="margin-bottom:12px">Ce guide décrit les extractions à réaliser dans Silae <strong>avant</strong> d'utiliser le modélisateur. L'ensemble du travail de diagnostic repose sur ces 3 fichiers.</div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <strong>Extraction "Gestion interne simplifiée" — Silae Back-office</strong>
+      <p>Dans Silae, accéder au menu <code>Reporting → Gestion interne → Export simplifié</code>. Cocher les colonnes : Numéro dossier, Raison sociale, Mode de gestion (Externalisation / Mise à disposition), Nombre de salariés, Coffre-fort actif.</p>
+      <p>Ce fichier correspond à l'<strong>Analyse des dossiers</strong> (colonnes G = mode, K = salariés, M = coffre-fort, AA→ = CCN).</p>
+      <span class="step-tag" style="background:#d1fae5;color:#065f46">✅ Fichier 1 : Analyse_des_dossiers.xlsx</span>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <strong>Extraction MySilae Entreprise — fonctionnalités activées par dossier</strong>
+      <p>Dans Silae, accéder à <code>MySilae → Administration → Synthèse des accès entreprise</code>. Exporter la liste avec les fonctionnalités actives par dossier. La colonne F <strong>"Absences et mobilité"</strong> (marquée X) indique la gestion des congés payés sur Silae — critère bloquant pour la migration Wagyz.</p>
+      <span class="step-tag" style="background:#d1fae5;color:#065f46">✅ Fichier 2 : Fonctionnalité_Silae.xlsx</span>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <strong>Table de référence CCN Wagyz / Silae</strong>
+      <p>Ce fichier contient la correspondance entre les codes CCN Silae (format lettre+3 chiffres) et les conventions collectives disponibles sur Wagyz. Il est fourni par l'équipe Wagyz et mis à jour à chaque nouvelle CCN paramétrée. Il sert à déterminer si chaque dossier est migrable.</p>
+      <p>Statuts possibles : <strong>En production</strong> (migrable), <strong>A recetter</strong> (migrable sous conditions, option à activer), <strong>Recette bloquée / Non référencée</strong> (non migrable).</p>
+      <span class="step-tag" style="background:#d1fae5;color:#065f46">✅ Fichier 3 : ccn_wagyz_silae.xlsx</span>
+      <span class="step-tag" style="background:#dbeafe;color:#1e3a8a">ℹ Table embarquée dans l'outil (91 CCN)</span>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <strong>Ce que le modélisateur fait automatiquement à partir de ces fichiers</strong>
+      <p>• <strong>Correspondance CCN</strong> : RECHERCHEV automatique entre codes CCN Silae et table Wagyz via le code IDCC<br>
+         • <strong>Tableau croisé</strong> : mode de gestion × disponibilité CCN × CP Silae → statut migrable ou non par dossier<br>
+         • <strong>Attribution des vagues</strong> : chaque dossier reçoit une vague en fonction de la combinaison de ses critères<br>
+         • <strong>Calcul de charge</strong> : Σ(60 min + nb_salariés × 3 min) par dossier réel, pas de moyennes fictives<br>
+         • <strong>Export Excel</strong> : liste complète avec vague, raison de blocage, coffre-fort, CP Silae</p>
+    </div>
+  </div>
+
+  <button class="btn-primary" onclick="document.querySelector('[onclick*=\'import\']').click()">📥 Passer à l'import des fichiers →</button>
+</div>
+
+<!-- ══ IMPORT ══ -->
+<div class="pane" id="P-import">
+  <div class="al inf" style="margin-bottom:12px">Importez les 3 fichiers Silae. L'analyse complète se lance automatiquement dès que les 2 fichiers obligatoires sont chargés.</div>
+
+  <div class="iz-grid">
+    <div>
+      <div class="iz" id="IZ-dos" ondragover="dzO(event,'IZ-dos')" ondragleave="dzL('IZ-dos')" ondrop="dzD(event,'dos')">
+        <input type="file" accept=".xlsx" onchange="loadF(this,'dos')">
+        <div class="iz-icon">📊</div>
+        <div class="iz-lbl">Analyse des dossiers <span style="color:var(--tx-da)">*</span></div>
+        <div class="iz-sub">Colonnes G·K·M·AA→<br>Mode · Salariés · Coffre-fort · CCN</div>
+      </div>
+      <div id="ST-dos" style="font-size:10px;color:var(--cts);text-align:center;margin-top:4px"></div>
+    </div>
+    <div>
+      <div class="iz" id="IZ-fonc" ondragover="dzO(event,'IZ-fonc')" ondragleave="dzL('IZ-fonc')" ondrop="dzD(event,'fonc')">
+        <input type="file" accept=".xlsx" onchange="loadF(this,'fonc')">
+        <div class="iz-icon">⚙️</div>
+        <div class="iz-lbl">Fonctionnalités Silae <span style="color:var(--tx-da)">*</span></div>
+        <div class="iz-sub">Colonne F = CP Silae<br>"Absences et mobilité"</div>
+      </div>
+      <div id="ST-fonc" style="font-size:10px;color:var(--cts);text-align:center;margin-top:4px"></div>
+    </div>
+    <div>
+      <div class="iz" id="IZ-ccn" ondragover="dzO(event,'IZ-ccn')" ondragleave="dzL('IZ-ccn')" ondrop="dzD(event,'ccn')">
+        <input type="file" accept=".xlsx" onchange="loadF(this,'ccn')">
+        <div class="iz-icon">📖</div>
+        <div class="iz-lbl">CCN Wagyz/Silae</div>
+        <div class="iz-sub">Table de référence<br><em>Optionnel — table embarquée utilisée si absent</em></div>
+      </div>
+      <div id="ST-ccn" style="font-size:10px;color:var(--cts);text-align:center;margin-top:4px">Table embarquée active (91 CCN)</div>
+    </div>
+  </div>
+
+  <div class="sec">Option d'analyse</div>
+  <div class="opt-row" id="OPT-recetter" onclick="toggleOpt()">
+    <div class="opt-chk" id="OPT-chk">✓</div>
+    <div class="opt-txt">
+      <strong>Inclure les dossiers avec CCN "À recetter" (disponible dans 6 mois)</strong>
+      <span>Si activé : les dossiers &lt;10 sal. avec CCN à recetter sont placés en Vague 2 (avec mention). Si désactivé : ces dossiers sont classés non migrables. Applicable uniquement si le cabinet accepte le risque de timing.</span>
+    </div>
+  </div>
+
+  <div id="O-import-status"></div>
+
+  <div class="sec">Résultats de l'import</div>
+  <div class="cards c5" id="O-import-cards" style="display:none">
+    <div class="card"><div class="l">Total dossiers</div><div class="v" id="OI-total">—</div></div>
+    <div class="card ok"><div class="l">✅ Migrables</div><div class="v" id="OI-mig">—</div><div class="s" id="OI-mig-s"></div></div>
+    <div class="card wa"><div class="l">⚠ Sous conditions</div><div class="v" id="OI-cond">—</div><div class="s" id="OI-cond-s"></div></div>
+    <div class="card da"><div class="l">🚫 Non migrables</div><div class="v" id="OI-nm">—</div><div class="s" id="OI-nm-s"></div></div>
+    <div class="card da"><div class="l">🔒 dont CP Silae</div><div class="v" id="OI-cp">—</div><div class="s" id="OI-cp-s"></div></div>
+  </div>
+</div>
+
+<!-- ══ ANALYSE ══ -->
+<div class="pane" id="P-analyse">
+  <div id="O-ana-wait" class="al wa">Importez et analysez les fichiers dans l'onglet "Import Silae" pour accéder à l'analyse.</div>
+  <div id="O-ana-content" style="display:none">
+    <div class="sec">Décomposition du portefeuille — mutuellement exclusif, total = 100%</div>
+    <div style="border:1px solid var(--bdt);border-radius:var(--rd);padding:13px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:13px;font-weight:700">Répartition des <span id="OA-total">—</span> dossiers</span>
+        <span class="bdg bg" id="OA-badge">—</span>
+      </div>
+      <div class="brow"><span class="bl">✅ Vague 1 — simples</span><div class="btrk"><div class="bfil" id="BA-v1" style="background:#1D9E75"></div></div><span class="bv" id="BV-v1">—</span></div>
+      <div class="brow"><span class="bl">✅ Vague 2 — standards</span><div class="btrk"><div class="bfil" id="BA-v2" style="background:#185FA5"></div></div><span class="bv" id="BV-v2">—</span></div>
+      <div class="brow"><span class="bl">✅ Vague 3 — MAD/50+</span><div class="btrk"><div class="bfil" id="BA-v3" style="background:#EF9F27"></div></div><span class="bv" id="BV-v3">—</span></div>
+      <div class="brow"><span class="bl">🚫 Bloqués CCN</span><div class="btrk"><div class="bfil" id="BA-nm-ccn" style="background:#E24B4A"></div></div><span class="bv" id="BV-nm-ccn">—</span></div>
+      <div class="brow"><span class="bl">🔒 Bloqués CP Silae</span><div class="btrk"><div class="bfil" id="BA-nm-cp" style="background:#7B1D1D"></div></div><span class="bv" id="BV-nm-cp">—</span></div>
+      <div class="brow"><span class="bl">🚫+🔒 Bloqués CCN+CP</span><div class="btrk"><div class="bfil" id="BA-nm-both" style="background:#4B0000"></div></div><span class="bv" id="BV-nm-both">—</span></div>
+      <div id="OA-check" style="font-size:10px;margin-top:8px;color:var(--tx-ok);font-weight:600"></div>
+    </div>
+
+    <div class="cards c4">
+      <div class="card"><div class="l">Charge totale réelle</div><div class="v" id="OA-jh">—</div><div class="s" id="OA-jh-s">dossiers migrables</div></div>
+      <div class="card"><div class="l">Charge moy. / dossier</div><div class="v" id="OA-moy">—</div><div class="s">1h + 3min/sal</div></div>
+      <div class="card"><div class="l">Dossiers MAD migrables</div><div class="v" id="OA-mad">—</div><div class="s" id="OA-mad-s"></div></div>
+      <div class="card"><div class="l">Coffres-forts (info)</div><div class="v" id="OA-cf">—</div><div class="s">à mentionner au client</div></div>
+    </div>
+
+    <div class="sec">CCN présentes dans le portefeuille</div>
+    <div id="OA-ccn-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;margin-bottom:10px"></div>
+
+    <div class="sec">Raisons de blocage détaillées</div>
+    <div id="OA-raisons"></div>
+  </div>
+</div>
+
+<!-- ══ VAGUES ══ -->
+<div class="pane" id="P-vagues">
+  <div id="O-vag-wait" class="al wa">Lancez l'analyse pour générer les vagues.</div>
+  <div id="O-vag-content" style="display:none">
+    <div class="cards c4" style="margin-bottom:12px">
+      <div class="card ok"><div class="l">Vague 1 — Simples</div><div class="v" id="OV-v1">—</div><div class="s">Ext. · CCN prod. · &lt;10 sal.</div></div>
+      <div class="card inf"><div class="l">Vague 2 — Standards</div><div class="v" id="OV-v2">—</div><div class="s">Ext. · 10-49 sal. ou CCN recetter</div></div>
+      <div class="card wa"><div class="l">Vague 3 — Complexes</div><div class="v" id="OV-v3">—</div><div class="s">MAD · 50+ sal. · janv-mars</div></div>
+      <div class="card da"><div class="l">Non migrables</div><div class="v" id="OV-nm">—</div><div class="s">CP Silae · CCN manquante</div></div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
+      <select id="V-filtre" onchange="renderVagues()" style="font-size:11px;padding:4px 8px;border:1px solid var(--bds);border-radius:6px;font-family:var(--fn)">
+        <option value="tous">Tous les dossiers</option>
+        <option value="V1">Vague 1 uniquement</option>
+        <option value="V2">Vague 2 uniquement</option>
+        <option value="V3">Vague 3 uniquement</option>
+        <option value="NM">Non migrables uniquement</option>
+      </select>
+      <input type="text" id="V-search" oninput="renderVagues()" placeholder="Rechercher dossier…" style="font-size:11px;padding:4px 8px;border:1px solid var(--bds);border-radius:6px;flex:1;min-width:150px;font-family:var(--fn)">
+      <span id="V-count" style="font-size:10px;color:var(--cts)"></span>
+    </div>
+    <div class="dos-scroll">
+      <table class="dos-tbl">
+        <thead><tr>
+          <th>N° Dossier</th><th>Raison sociale</th><th>Sal.</th><th>Mode</th>
+          <th>CCN</th><th>CP Silae</th><th>Coffre</th><th>Charge</th><th>Vague</th><th>Raison</th>
+        </tr></thead>
+        <tbody id="O-dos-body"></tbody>
+      </table>
+    </div>
+    <button class="btn-primary btn-export" onclick="EXPORT()" style="margin-top:12px">📥 Exporter le plan de migration Excel</button>
+  </div>
+</div>
+
+<!-- ══ ÉQUIPES & DATES ══ -->
+<div class="pane" id="P-equipes">
+  <div class="al inf" id="O-eq-info" style="margin-bottom:10px">—</div>
+  <div class="sec">Dates du projet</div>
+  <div class="date-grid">
+    <div class="date-card"><div class="dl">Démarrage cible</div>
+      <input type="date" id="I-dstart" onchange="CALC()">
+      <div style="font-size:11px;font-weight:600;margin-top:4px" id="O-dstart-l">—</div>
+    </div>
+    <div class="date-card"><div class="dl">Fin de migration cible</div>
+      <input type="date" id="I-dend" onchange="CALC()">
+      <div style="font-size:11px;font-weight:600;margin-top:4px" id="O-dend-l">—</div>
+      <div style="font-size:10px;color:var(--cts);margin-top:2px" id="O-dend-i"></div>
+    </div>
+  </div>
+  <div id="O-tl-wrap" style="display:none">
+    <div class="tline"><div class="tline-bar" id="O-tl-bar" style="left:0;width:5%;background:#1D9E75">—</div></div>
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--ctt);margin-bottom:4px" id="O-tl-lbls"></div>
+    <div class="al inf" id="O-tl-alert">—</div>
+  </div>
+  <div class="sec">Organisation de l'équipe</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div>
+      <label style="font-size:11px;color:var(--cts);display:block;margin-bottom:4px">Gestionnaires de paie (GP)</label>
+      <input type="number" id="N-gp" value="10" min="1" max="500" onchange="CALC()" style="width:100%;padding:6px 10px;border:1px solid var(--bds);border-radius:6px;font-size:13px;font-weight:600;font-family:var(--fn)">
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--cts);display:block;margin-bottom:4px">ETP dédiés migration</label>
+      <input type="number" id="N-etpd" value="2" min="0" max="50" onchange="CALC()" style="width:100%;padding:6px 10px;border:1px solid var(--bds);border-radius:6px;font-size:13px;font-weight:600;font-family:var(--fn)">
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--cts);display:block;margin-bottom:4px">Dispo GP sur site (%)</label>
+      <input type="number" id="N-dgp" value="20" min="5" max="50" onchange="CALC()" style="width:100%;padding:6px 10px;border:1px solid var(--bds);border-radius:6px;font-size:13px;font-weight:600;font-family:var(--fn)">
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--cts);display:block;margin-bottom:4px">Logiciel source</label>
+      <select id="I-src" onchange="CALC()" style="width:100%;padding:6px 10px;border:1px solid var(--bds);border-radius:6px;font-size:12px;font-family:var(--fn)">
+        <option value="silae">Silae (gain -50%)</option>
+        <option value="autre">Autre logiciel</option>
+      </select>
+    </div>
+  </div>
+  <div class="sec">Facteurs humains</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div><label style="font-size:11px;color:var(--cts);display:block;margin-bottom:4px">Résistance au changement (1→10)</label>
+      <input type="number" id="N-res" value="4" min="1" max="10" onchange="CALC()" style="width:100%;padding:6px 10px;border:1px solid var(--bds);border-radius:6px;font-size:13px;font-weight:600;font-family:var(--fn)"></div>
+    <div><label style="font-size:11px;color:var(--cts);display:block;margin-bottom:4px">Surcharge production (1→10)</label>
+      <input type="number" id="N-sur" value="5" min="1" max="10" onchange="CALC()" style="width:100%;padding:6px 10px;border:1px solid var(--bds);border-radius:6px;font-size:13px;font-weight:600;font-family:var(--fn)"></div>
+    <div><label style="font-size:11px;color:var(--cts);display:block;margin-bottom:4px">Absences/congés (%)</label>
+      <input type="number" id="N-abs" value="18" min="0" max="50" onchange="CALC()" style="width:100%;padding:6px 10px;border:1px solid var(--bds);border-radius:6px;font-size:13px;font-weight:600;font-family:var(--fn)"></div>
+    <div><label style="font-size:11px;color:var(--cts);display:block;margin-bottom:4px">Bascule MAD/complexes</label>
+      <select id="I-mois" onchange="CALC()" style="width:100%;padding:6px 10px;border:1px solid var(--bds);border-radius:6px;font-size:12px;font-family:var(--fn)">
+        <option value="bon">Janv.–Mars (idéal)</option>
+        <option value="moy">Avr.–Juin</option>
+        <option value="mau">Juil.–Déc. (déconseillé)</option>
+      </select>
+    </div>
+  </div>
+  <div class="cards c3" style="margin-top:12px">
+    <div class="card"><div class="l">Capacité mensuelle</div><div class="v" id="O-cap">—</div><div class="s">jours/mois</div></div>
+    <div class="card"><div class="l">Score engagement</div><div class="v" id="O-eng">—</div><div class="s" id="O-eng-s"></div></div>
+    <div class="card"><div class="l">Coeff. durée</div><div class="v" id="O-coef">—</div><div class="s">1.0 = optimal</div></div>
+  </div>
+</div>
+
+<!-- ══ STRATÉGIE ══ -->
+<div class="pane" id="P-strategie">
+  <div id="O-rec-banner"></div>
+  <div class="sec">Choisissez votre axe</div>
+  <div class="axes" id="O-axes"></div>
+  <div class="sec">Comparatif des 3 axes</div>
+  <table class="tbl"><thead><tr><th></th><th style="color:#0F6E56">Prudent</th><th style="color:#185FA5">Standard</th><th style="color:#7D4A08">Ambitieux</th></tr></thead><tbody id="O-cmp"></tbody></table>
+  <div class="sec">Analyse des risques</div>
+  <div id="O-risks"></div>
+</div>
+
+<!-- ══ PLANNING ══ -->
+<div class="pane" id="P-planning">
+  <div id="O-plan-banner" class="al inf" style="margin-bottom:10px">—</div>
+  <div class="cards c3" style="margin-bottom:10px">
+    <div class="card"><div class="l">Axe</div><div class="v" id="O-plan-axe">—</div></div>
+    <div class="card"><div class="l">Durée totale</div><div class="v" id="O-plan-dur">—</div><div class="s" id="O-plan-durs"></div></div>
+    <div class="card"><div class="l">Fin estimée</div><div class="v" id="O-plan-fin">—</div><div class="s" id="O-plan-bwarn" style="color:var(--tx-wa)"></div></div>
+  </div>
+  <div class="sec">Phases du projet</div>
+  <div class="m-axis" id="O-m-axis"></div>
+  <div id="O-ph-tl"></div>
+  <div class="sec">Calendrier</div>
+  <div class="cal-row" id="O-cal"></div>
+  <div class="sec">Jalons clés</div>
+  <div id="O-jalons"></div>
+</div>
+
+<!-- ══ ROI & SYNTHÈSE ══ -->
+<div class="pane" id="P-roi">
+
+  <!-- ══ PARAMÈTRES ROI ══ -->
+  <div class="sec">Paramètres de comparaison tarifaire</div>
+  <div class="al inf" id="O-roi-import-note" style="margin-bottom:10px">
+    💡 Si vous avez importé les fichiers Silae, le volume de bulletins et la répartition par taille de dossier sont renseignés automatiquement. Vous pouvez ajuster manuellement ci-dessous.
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px">
+    <div>
+      <label style="font-size:11px;color:var(--cts);display:block;margin-bottom:4px;font-weight:600">Bulletins totaux / mois (cabinet)</label>
+      <input type="number" id="ROI-bp-total" value="7500" min="1" max="999999" onchange="calcROI()" style="width:100%;padding:7px 10px;border:1.5px solid var(--bds);border-radius:6px;font-size:14px;font-weight:700;font-family:var(--fn)">
+      <div style="font-size:10px;color:var(--cts);margin-top:3px">Tous dossiers confondus (Ext. uniquement)</div>
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--cts);display:block;margin-bottom:4px;font-weight:600">Mois de démarrage migration</label>
+      <select id="ROI-start-mois" onchange="calcROI()" style="width:100%;padding:7px 10px;border:1.5px solid var(--bds);border-radius:6px;font-size:13px;font-family:var(--fn)">
+        <option value="7">Juillet 2026</option>
+        <option value="8">Août 2026</option>
+        <option value="9">Septembre 2026</option>
+        <option value="10">Octobre 2026</option>
+        <option value="11">Novembre 2026</option>
+        <option value="12">Décembre 2026</option>
+        <option value="13" selected>Janvier 2027</option>
+        <option value="14">Février 2027</option>
+        <option value="15">Mars 2027</option>
+        <option value="16">Avril 2027</option>
+        <option value="17">Mai 2027</option>
+        <option value="18">Juin 2027</option>
+      </select>
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--cts);display:block;margin-bottom:4px;font-weight:600">Axe de migration</label>
+      <select id="ROI-axe" onchange="calcROI()" style="width:100%;padding:7px 10px;border:1.5px solid var(--bds);border-radius:6px;font-size:13px;font-family:var(--fn)">
+        <option value="prudent">Prudent (6 mois / vague)</option>
+        <option value="standard" selected>Standard (4 mois / vague)</option>
+        <option value="ambitieux">Ambitieux (3 mois / vague)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="sec">Répartition des bulletins par taille de dossier</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px">
+    <div style="background:var(--cbs);border-radius:var(--rd);padding:11px;border:1px solid var(--bdt)">
+      <div style="font-size:10px;font-weight:700;color:var(--cts);text-transform:uppercase;margin-bottom:6px">1–9 sal. (col. Silae "1-9")</div>
+      <input type="number" id="ROI-bp-s" value="764" min="0" onchange="calcROI()" style="width:100%;padding:5px 8px;border:1px solid var(--bds);border-radius:5px;font-size:13px;font-weight:700;font-family:var(--fn);margin-bottom:3px">
+      <div style="font-size:10px;color:var(--cts)" id="ROI-bp-s-pct">—</div>
+    </div>
+    <div style="background:var(--cbs);border-radius:var(--rd);padding:11px;border:1px solid var(--bdt)">
+      <div style="font-size:10px;font-weight:700;color:var(--cts);text-transform:uppercase;margin-bottom:6px">10–249 sal. (col. Silae "10-249")</div>
+      <input type="number" id="ROI-bp-m" value="4648" min="0" onchange="calcROI()" style="width:100%;padding:5px 8px;border:1px solid var(--bds);border-radius:5px;font-size:13px;font-weight:700;font-family:var(--fn);margin-bottom:3px">
+      <div style="font-size:10px;color:var(--cts)" id="ROI-bp-m-pct">—</div>
+    </div>
+    <div style="background:var(--cbs);border-radius:var(--rd);padding:11px;border:1px solid var(--bdt)">
+      <div style="font-size:10px;font-weight:700;color:var(--cts);text-transform:uppercase;margin-bottom:6px">250+ sal. (col. Silae "250+")</div>
+      <input type="number" id="ROI-bp-l" value="2088" min="0" onchange="calcROI()" style="width:100%;padding:5px 8px;border:1px solid var(--bds);border-radius:5px;font-size:13px;font-weight:700;font-family:var(--fn);margin-bottom:3px">
+      <div style="font-size:10px;color:var(--cts)" id="ROI-bp-l-pct">—</div>
+    </div>
+  </div>
+  <div class="al wa" id="ROI-bp-warn" style="display:none;margin-bottom:8px">⚠ La somme des BP par taille ne correspond pas au total. Vérifiez les valeurs.</div>
+
+  <!-- ══ RÉSULTATS INSTANTANÉS ══ -->
+  <div class="sec">Coût mensuel actuel — Sans migration (référence)</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">
+    <div class="card da"><div class="l">Coût Silae 2026/mois</div><div class="v" id="ROI-silae26-mois">—</div><div class="s">tarif grille 2026</div></div>
+    <div class="card da"><div class="l">Coût Silae 2027/mois</div><div class="v" id="ROI-silae27-mois">—</div><div class="s">tarif grille 2027 (+haussse)</div></div>
+    <div class="card ok"><div class="l">Coût Wagyz/mois</div><div class="v" id="ROI-wagyz-mois">—</div><div class="s" id="ROI-wagyz-palier">tarif fixe 3 ans</div></div>
+    <div class="card ok"><div class="l">Économie si migration totale</div><div class="v" id="ROI-eco-mois">—</div><div class="s" id="ROI-eco-pct">/mois vs Silae 2027</div></div>
+  </div>
+
+  <!-- ══ IMPACT HAUSSE SILAE ══ -->
+  <div style="background:var(--bg-da);border:2px solid var(--bd-da);border-radius:var(--rd);padding:14px;margin-bottom:14px">
+    <div style="font-size:13px;font-weight:700;color:var(--tx-da);margin-bottom:10px">🔴 Coût de la non-migration — Impact de rester sur Silae</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+      <div style="background:#fff;border-radius:6px;padding:10px;text-align:center">
+        <div style="font-size:10px;color:var(--cts);font-weight:600;margin-bottom:4px">SURCOÛT SILAE 2026→2027</div>
+        <div style="font-size:22px;font-weight:800;color:var(--tx-da)" id="ROI-hausse-mois">—</div>
+        <div style="font-size:10px;color:var(--cts)">par mois supplémentaire</div>
+      </div>
+      <div style="background:#fff;border-radius:6px;padding:10px;text-align:center">
+        <div style="font-size:10px;color:var(--cts);font-weight:600;margin-bottom:4px">SURCOÛT ANNUEL 2027</div>
+        <div style="font-size:22px;font-weight:800;color:var(--tx-da)" id="ROI-hausse-an">—</div>
+        <div style="font-size:10px;color:var(--cts)">vs rester sur Silae 2026</div>
+      </div>
+      <div style="background:#fff;border-radius:6px;padding:10px;text-align:center">
+        <div style="font-size:10px;color:var(--cts);font-weight:600;margin-bottom:4px">ÉCONOMIE SI MIGRATION TOTALE</div>
+        <div style="font-size:22px;font-weight:800;color:var(--tx-ok)" id="ROI-eco-an27">—</div>
+        <div style="font-size:10px;color:var(--cts)">sur l'année 2027 complète</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TABLEAU MENSUEL ══ -->
+  <div class="sec">Tableau mensuel — Évolution des coûts juillet 2026 → décembre 2027</div>
+  <div style="font-size:10px;color:var(--cts);margin-bottom:8px">
+    🟥 Coût Silae sans migration · 🟦 Coût Wagyz (BP migrés) · ⬛ Coût Silae résiduel (BP non encore migrés) · 🟢 Gain mensuel
+  </div>
+  <div style="overflow-x:auto;margin-bottom:12px">
+    <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:700px">
+      <thead>
+        <tr style="background:#1a1a1a;color:#fff">
+          <th style="padding:7px 9px;text-align:left;font-weight:700;white-space:nowrap">Mois</th>
+          <th style="padding:7px 9px;text-align:right;white-space:nowrap">BP Wagyz</th>
+          <th style="padding:7px 9px;text-align:right;white-space:nowrap">BP Silae</th>
+          <th style="padding:7px 9px;text-align:right;white-space:nowrap">Coût Wagyz</th>
+          <th style="padding:7px 9px;text-align:right;white-space:nowrap">Coût Silae résiduel</th>
+          <th style="padding:7px 9px;text-align:right;white-space:nowrap;font-weight:700">Total réel</th>
+          <th style="padding:7px 9px;text-align:right;white-space:nowrap">Sans migration</th>
+          <th style="padding:7px 9px;text-align:right;white-space:nowrap;color:#4ade80">Gain mois</th>
+          <th style="padding:7px 9px;text-align:right;white-space:nowrap;color:#4ade80">Gain cumulé</th>
+        </tr>
+      </thead>
+      <tbody id="ROI-table-body"></tbody>
+      <tfoot id="ROI-table-foot"></tfoot>
+    </table>
+  </div>
+
+  <!-- ══ GRAPHIQUE VISUEL ══ -->
+  <div class="sec">Visualisation — Coût mensuel Silae vs stratégie de migration</div>
+  <div id="ROI-chart" style="margin-bottom:14px"></div>
+
+  <!-- ══ SYNTHÈSE 2027 ══ -->
+  <div class="sec">Synthèse 2027 — Impact financier de la stratégie choisie</div>
+  <div style="background:linear-gradient(135deg,#0F6E56,#185FA5);border-radius:var(--rd);padding:18px;color:#fff;margin-bottom:14px">
+    <div style="font-size:14px;font-weight:700;margin-bottom:12px;opacity:.9">Résumé exécutif — À présenter aux dirigeants</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px">
+      <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:12px;text-align:center">
+        <div style="font-size:10px;opacity:.8;font-weight:600;margin-bottom:5px;text-transform:uppercase">Coût Silae 2027 (sans migration)</div>
+        <div style="font-size:24px;font-weight:800" id="ROI-synth-silae">—</div>
+      </div>
+      <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:12px;text-align:center">
+        <div style="font-size:10px;opacity:.8;font-weight:600;margin-bottom:5px;text-transform:uppercase">Coût réel avec migration</div>
+        <div style="font-size:24px;font-weight:800" id="ROI-synth-reel">—</div>
+      </div>
+      <div style="background:rgba(255,255,255,.25);border-radius:8px;padding:12px;text-align:center;border:2px solid rgba(255,255,255,.5)">
+        <div style="font-size:10px;opacity:.8;font-weight:600;margin-bottom:5px;text-transform:uppercase">Économie réalisée 2027</div>
+        <div style="font-size:24px;font-weight:800" id="ROI-synth-eco">—</div>
+      </div>
+    </div>
+    <div style="font-size:11px;opacity:.85;line-height:1.7;background:rgba(0,0,0,.15);border-radius:6px;padding:10px" id="ROI-synth-texte">—</div>
+  </div>
+
+  <!-- ══ DÉTAIL TARIFAIRE ══ -->
+  <div class="sec">Détail tarifaire appliqué</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+    <div style="background:var(--cbs);border-radius:var(--rd);padding:12px;border:1px solid var(--bdt)">
+      <div style="font-size:11px;font-weight:700;margin-bottom:8px">Grille Wagyz (tarif fixe 3 ans)</div>
+      <table style="width:100%;font-size:10px;border-collapse:collapse">
+        <tr style="background:#1D9E75;color:#fff"><th style="padding:3px 6px;text-align:left">Palier BP/mois</th><th style="padding:3px 6px;text-align:right">Tarif/BP</th></tr>
+        <tr style="background:#f0faf5"><td style="padding:3px 6px">&gt; 100 000</td><td style="padding:3px 6px;text-align:right;font-weight:600">1,95 €</td></tr>
+        <tr><td style="padding:3px 6px">50 000 – 99 999</td><td style="padding:3px 6px;text-align:right;font-weight:600">2,25 €</td></tr>
+        <tr style="background:#f0faf5"><td style="padding:3px 6px">25 000 – 49 999</td><td style="padding:3px 6px;text-align:right;font-weight:600">2,65 €</td></tr>
+        <tr><td style="padding:3px 6px">10 000 – 24 999</td><td style="padding:3px 6px;text-align:right;font-weight:600">2,95 €</td></tr>
+        <tr style="background:#f0faf5"><td style="padding:3px 6px">5 000 – 9 999</td><td style="padding:3px 6px;text-align:right;font-weight:600">3,35 €</td></tr>
+        <tr><td style="padding:3px 6px">1 000 – 4 999</td><td style="padding:3px 6px;text-align:right;font-weight:600">3,65 €</td></tr>
+        <tr style="background:#f0faf5"><td style="padding:3px 6px">&lt; 1 000</td><td style="padding:3px 6px;text-align:right;font-weight:600">3,95 €</td></tr>
+      </table>
+      <div style="font-size:9px;color:var(--tx-ok);margin-top:6px;font-weight:600" id="ROI-wagyz-detail">—</div>
+    </div>
+    <div style="background:var(--cbs);border-radius:var(--rd);padding:12px;border:1px solid var(--bdt)">
+      <div style="font-size:11px;font-weight:700;margin-bottom:8px">Tarifs Silae appliqués à votre cabinet</div>
+      <div style="font-size:10px;color:var(--cts);margin-bottom:6px" id="ROI-silae-ligne-lbl">—</div>
+      <table style="width:100%;font-size:10px;border-collapse:collapse">
+        <tr style="background:#E24B4A;color:#fff"><th style="padding:3px 6px;text-align:left">Taille client</th><th style="padding:3px 6px;text-align:right">2026</th><th style="padding:3px 6px;text-align:right">2027</th><th style="padding:3px 6px;text-align:right">Hausse</th></tr>
+        <tr style="background:#fdf0f0"><td style="padding:3px 6px">1-9 sal.</td><td style="padding:3px 6px;text-align:right;font-weight:600" id="ROI-ts26s">—</td><td style="padding:3px 6px;text-align:right;font-weight:600" id="ROI-ts27s">—</td><td style="padding:3px 6px;text-align:right;color:var(--tx-da)" id="ROI-tsh-s">—</td></tr>
+        <tr><td style="padding:3px 6px">10-249 sal.</td><td style="padding:3px 6px;text-align:right;font-weight:600" id="ROI-ts26m">—</td><td style="padding:3px 6px;text-align:right;font-weight:600" id="ROI-ts27m">—</td><td style="padding:3px 6px;text-align:right;color:var(--tx-da)" id="ROI-tsh-m">—</td></tr>
+        <tr style="background:#fdf0f0"><td style="padding:3px 6px">250+ sal.</td><td style="padding:3px 6px;text-align:right;font-weight:600" id="ROI-ts26l">—</td><td style="padding:3px 6px;text-align:right;font-weight:600" id="ROI-ts27l">—</td><td style="padding:3px 6px;text-align:right;color:var(--tx-da)" id="ROI-tsh-l">—</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ SECTION PILOTAGE EXISTANTE ══ -->
+  <button class="btn-primary btn-magic" onclick="MAGIC()"><span style="font-size:20px">✦</span> Optimisation automatique — Respecter mon délai de migration <span style="font-size:20px">✦</span></button>
+  <div class="al da" id="O-magic-warn" style="display:none">—</div>
+  <div id="O-magic-res" style="display:none;border:2px solid var(--bd-inf);border-radius:var(--rd);background:var(--bg-inf);padding:14px;margin-bottom:12px">
+    <div style="font-size:13px;font-weight:700;color:var(--tx-inf);margin-bottom:10px" id="O-mr-title">—</div>
+    <div class="mr-grid" id="O-mr-grid"></div>
+    <div style="font-size:11px;color:var(--tx-inf);line-height:1.7;border-top:1px solid var(--bd-inf);padding-top:8px;margin-top:8px;white-space:pre-line" id="O-mr-detail">—</div>
+  </div>
+  <div class="sec">Indicateurs de pilotage</div>
+  <table class="tbl"><thead><tr><th>Indicateur</th><th>Fréquence</th><th>Seuil d'alerte</th></tr></thead><tbody>
+    <tr><td>Taux dossiers paramétrés / objectif vague</td><td>Hebdo (hors période paie)</td><td>&gt;10% de retard</td></tr>
+    <tr><td>Taux de formation GP</td><td>Avant chaque vague</td><td>&lt;80% formés</td></tr>
+    <tr><td>Bulletins test validés</td><td>Par dossier pilote</td><td>&lt;2 bulletins validés</td></tr>
+    <tr><td>Satisfaction collaborateur</td><td>Fin de sprint</td><td>&lt;6/10</td></tr>
+    <tr><td>Adhésion client MAD</td><td>Par dossier MAD</td><td>Pas de validation sous 5j</td></tr>
+  </tbody></table>
+</div>
+</div>
+
+<script>
+const CCN_TABLE = {"S007": {"idcc": "0478", "libelle": "Sociétés financières", "statut": "Non référencée dans Wagyz"}, "B065": {"idcc": "1486", "libelle": "Bureaux d'études techniques", "statut": "En production"}, "P048": {"idcc": "2098", "libelle": "Prestataires de services", "statut": "En production"}, "C035": {"idcc": "0044", "libelle": "Chimie (industries)", "statut": "A recetter"}, "B008": {"idcc": "2609", "libelle": "Bâtiment (ETAM)", "statut": "En production"}, "B013": {"idcc": "1876", "libelle": "Bâtiment (Ouvriers : Bretagne)", "statut": "Non référencée dans Wagyz"}, "B026": {"idcc": "1596", "libelle": "Bâtiment (Ouvriers : Nationale - 10 salariés)", "statut": "En production"}, "A034": {"idcc": "2247", "libelle": "Assurances (courtage)", "statut": "En production"}, "H015": {"idcc": "0029", "libelle": "Hospitalisation privée à but non lucratif", "statut": "Non référencée dans Wagyz"}, "B006": {"idcc": "2420", "libelle": "Bâtiment (Cadres)", "statut": "En production"}, "B025": {"idcc": "1597", "libelle": "Bâtiment (Ouvriers : Nationale + 10 salariés)", "statut": "En production"}, "B029": {"idcc": "2625", "libelle": "Bâtiment (Ouvriers : Pays de la Loire)", "statut": "Non référencée dans Wagyz"}, "V014": {"idcc": "0804", "libelle": "Voyageurs, représentants, placiers (VRP)", "statut": "Non référencée dans Wagyz"}, "M018": {"idcc": "0650", "libelle": "Métallurgie (ingénieurs et cadres)", "statut": "Non référencée dans Wagyz"}, "M078": {"idcc": "1604", "libelle": "Métallurgie (Rouen et Dieppe)", "statut": "Non référencée dans Wagyz"}, "M110": {"idcc": "3248", "libelle": "Métallurgie", "statut": "En production"}, "G004": {"idcc": "2543", "libelle": "Géomètres-experts, topographes", "statut": "Non référencée dans Wagyz"}, "F005": {"idcc": "1516", "libelle": "Formation (organismes)", "statut": "Recette bloquée"}, "C055": {"idcc": "1517", "libelle": "Commerces de détail non alimentaires (Convention collective nationale)", "statut": "En production"}, "A039": {"idcc": "2412", "libelle": "Audiovisuel (production de films d'animation)", "statut": "Non référencée dans Wagyz"}, "C133": {"idcc": "3233", "libelle": "Ciments (industrie)", "statut": "Non référencée dans Wagyz"}, "M053": {"idcc": "1369", "libelle": "Métallurgie (Loire-Atlantique)", "statut": "Non référencée dans Wagyz"}, "B057": {"idcc": "0843", "libelle": "Boulangerie-pâtisserie (entreprises artisanales)", "statut": "En production"}, "I001": {"idcc": "1527", "libelle": "Immobilier", "statut": "En production"}, "S008": {"idcc": "2511", "libelle": "Sport", "statut": "A recetter"}, "M049": {"idcc": "2221", "libelle": "Métallurgie (Isère et Hautes-Alpes)", "statut": "Non référencée dans Wagyz"}, "A048": {"idcc": "1000", "libelle": "Avocats (personnel salarié) (fusion le 01/10/25 & remplacée par : 'Avocats : salariés des cabinets' - A051)", "statut": "Non référencée dans Wagyz"}, "A051": {"idcc": "3253", "libelle": "Avocats (salariés des cabinets)", "statut": "Non référencée dans Wagyz"}, "P018": {"idcc": "0176", "libelle": "Pharmacie (industrie)", "statut": "Non référencée dans Wagyz"}, "N002": {"idcc": "3236", "libelle": "Industrie et services nautiques (ex. Navigation de plaisance - IDCC 1423)", "statut": "Non référencée dans Wagyz"}, "H003": {"idcc": "1483", "libelle": "Habillement et articles textiles (commerce de détail)", "statut": "En production"}, "H019": {"idcc": "1979", "libelle": "Hôtels, cafés, restaurants", "statut": "En cours de paramétrage"}, "M104": {"idcc": "2931", "libelle": "Marchés financiers", "statut": "Non référencée dans Wagyz"}, "A018": {"idcc": "1880", "libelle": "Ameublement (négoce)", "statut": "En production"}, "O002": {"idcc": "1431", "libelle": "Optique - lunetterie de détail", "statut": "En production"}, "P053": {"idcc": "1512", "libelle": "Promotion immobilière", "statut": "Non référencée dans Wagyz"}, "C069": {"idcc": "0573", "libelle": "Commerces de gros", "statut": "En production"}, "B053": {"idcc": "0158", "libelle": "Bois et scieries (travail mécanique, négoce et importation)", "statut": "A recetter"}, "C050": {"idcc": "2596", "libelle": "Coiffure", "statut": "En production"}, "B051": {"idcc": "1947", "libelle": "Bois d'oeuvre et produits dérivés (Fusion avec CCN M107 : Matériaux de construction (négoce))", "statut": "Non référencée dans Wagyz"}, "M107": {"idcc": "3216", "libelle": "Matériaux de construction (négoce)", "statut": "En production"}, "D002": {"idcc": "1619", "libelle": "Dentaires (cabinets)", "statut": "En production"}, "T003": {"idcc": "2148", "libelle": "Télécommunications", "statut": "Non référencée dans Wagyz"}, "M046": {"idcc": "0863", "libelle": "Métallurgie (Ille-et-Vilaine - Morbihan)", "statut": "Non référencée dans Wagyz"}, "M056": {"idcc": "1902", "libelle": "Métallurgie (Maine-et-Loire)", "statut": "Non référencée dans Wagyz"}, "M070": {"idcc": "1472", "libelle": "Métallurgie (Pas-de-Calais)", "statut": "Non référencée dans Wagyz"}, "M077": {"idcc": "0878", "libelle": "Métallurgie (Rhône)", "statut": "Non référencée dans Wagyz"}, "P015": {"idcc": "7018", "libelle": "Paysage (entreprises)", "statut": "En production"}, "C001": {"idcc": "1147", "libelle": "Cabinets médicaux", "statut": "En production"}, "A002": {"idcc": "2706", "libelle": "Administrateurs et mandataires judiciaires (personnel)", "statut": "Non référencée dans Wagyz"}, "P091": {"idcc": "3244", "libelle": "Professions réglementées auprès des juridictions", "statut": "Non référencée dans Wagyz"}, "A023": {"idcc": "2332", "libelle": "Architecture (entreprises)", "statut": "En production"}, "D004": {"idcc": "0993", "libelle": "Dentaires (prothésistes et laboratoires de prothèse dentaire)", "statut": "Non référencée dans Wagyz"}, "M043": {"idcc": "1635", "libelle": "Métallurgie (Gironde-Landes)", "statut": "Non référencée dans Wagyz"}, "B055": {"idcc": "0500", "libelle": "Commerces de gros de l'habillement, de la mercerie, de la chaussure et du jouet (ex Bonneterie, lingerie, confection, mercerie)", "statut": "Non référencée dans Wagyz"}, "H002": {"idcc": "0675", "libelle": "Habillement (maisons à succursales de vente au détail)", "statut": "Non référencée dans Wagyz"}, "M039": {"idcc": "0984", "libelle": "Métallurgie (Eure-et-Loir)", "statut": "Non référencée dans Wagyz"}, "M074": {"idcc": "0054", "libelle": "Métallurgie (Région parisienne)", "statut": "Non référencée dans Wagyz"}, "F007": {"idcc": "2336", "libelle": "Habitat et  logement accompagnés (ex : Foyers de jeunes travailleurs)", "statut": "Non référencée dans Wagyz"}, "R007": {"idcc": "1501", "libelle": "Restauration rapide", "statut": "En production"}, "A044": {"idcc": "1090", "libelle": "Automobile", "statut": "En production"}, "B005": {"idcc": "", "libelle": "Bâtiment (accords nationaux)", "statut": "Non référencée dans Wagyz"}, "E108": {"idcc": "8523", "libelle": "Exploitations sylvicoles de la région Pays de la Loire", "statut": "Non référencée dans Wagyz"}, "I003": {"idcc": "0184", "libelle": "Imprimeries de labeur et industries graphiques", "statut": "Non référencée dans Wagyz"}, "G003": {"idcc": "1043", "libelle": "Gardiens, concierges et employés d'immeubles", "statut": "Non référencée dans Wagyz"}, "Q001": {"idcc": "0731", "libelle": "Quincaillerie (commerces nationale : cadres)", "statut": "Non référencée dans Wagyz"}, "Q002": {"idcc": "1383", "libelle": "Quincaillerie (commerces nationale : employés et agents de maîtrise)", "statut": "Non référencée dans Wagyz"}, "E003": {"idcc": "2121", "libelle": "Édition", "statut": "Non référencée dans Wagyz"}, "P002": {"idcc": "1539", "libelle": "Bureau et numérique (entreprises) : Commerces et services (ex : Papeterie, fournitures de bureau (commerces de détail))", "statut": "En production"}, "A003": {"idcc": "1412", "libelle": "Aéraulique, thermique et frigorifique", "statut": "Non référencée dans Wagyz"}, "C021": {"idcc": "7002", "libelle": "Céréales, meunerie, approvisionnement, alimentation (bétail), oléagineux", "statut": "Non référencée dans Wagyz"}, "A027": {"idcc": "2272", "libelle": "Assainissement et maintenance industrielle", "statut": "Non référencée dans Wagyz"}, "E023": {"idcc": "1790", "libelle": "Espaces de loisirs, d'attractions et culturels", "statut": "A recetter"}, "A021": {"idcc": "7010", "libelle": "Aquaculture", "statut": "Non référencée dans Wagyz"}, "E212": {"idcc": "7024", "libelle": "Production Agricole et CUMA", "statut": "En production"}, "T005": {"idcc": "0018", "libelle": "Textiles (industries)", "statut": "Non référencée dans Wagyz"}, "P024": {"idcc": "0292", "libelle": "Plasturgie", "statut": "En production"}, "T010": {"idcc": "1256", "libelle": "Thermiques (équipements : cadres et assimilés)", "statut": "Non référencée dans Wagyz"}, "V001": {"idcc": "2198", "libelle": "Commerce à distance et du E-commerce (ex : Entreprises du commerce à distance)", "statut": "A recetter"}, "E026": {"idcc": "0787", "libelle": "Experts-comptables et commissaires aux comptes", "statut": "Non référencée dans Wagyz"}, "S006": {"idcc": "1261", "libelle": "Sociaux et socioculturels (centres) et autres acteurs du lien social (associations)", "statut": "Non référencée dans Wagyz"}, "H016": {"idcc": "1631", "libelle": "Hôtellerie de plein air", "statut": "Non référencée dans Wagyz"}, "T020": {"idcc": "0275", "libelle": "Transport aérien (personnel au sol)", "statut": "Recette bloquée"}, "P022": {"idcc": "1555", "libelle": "Pharmacie, parapharmacie, produits vétérinaires (fabrication et commerce)", "statut": "En production"}, "A049": {"idcc": "1850", "libelle": "Avocats salariés (fusion le 01/10/25 & remplacée par : 'Avocats : salariés des cabinets' - A051)", "statut": "Non référencée dans Wagyz"}, "M015": {"idcc": "1982", "libelle": "Médico-techniques (négoce et prestations de services)", "statut": "Non référencée dans Wagyz"}, "M095": {"idcc": "1930", "libelle": "Métiers de la transformation des grains", "statut": "Non référencée dans Wagyz"}, "P054": {"idcc": "3043", "libelle": "Propreté et services associés (entreprises de)", "statut": "En production"}, "T026": {"idcc": "0016", "libelle": "Transports routiers et activités auxiliaires du transport", "statut": "Non référencée dans Wagyz"}, "P013": {"idcc": "1267", "libelle": "Pâtisserie", "statut": "En production"}, "A020": {"idcc": "1518", "libelle": "Métiers ÉCLAT (de l'Éducation, de la Culture, des Loisirs et de l'Animation agissant pour l'utilité sociale et environnementale au service des territoires)", "statut": "Non référencée dans Wagyz"}};
+
+// ═══════════════════════════════════════════════════════
+// ÉTAT GLOBAL
+// ═══════════════════════════════════════════════════════
+let _SC = 'standard';
+let _DOSSIERS = [];
+let _STATS = null;
+let _OPT_RECETTER = true;
+let _RAW = {dos: null, fonc: null, ccn: null};
+let _LOADED = {dos: false, fonc: false};
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+function SW(t, btn) {
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('a'));
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('a'));
+  document.getElementById('P-' + t).classList.add('a');
+  btn.classList.add('a');
+  CALC();
+}
+function GN(id) { return parseFloat(document.getElementById(id)?.value) || 0; }
+function GS(id) { return document.getElementById(id)?.value || ''; }
+function SET(id, v) { const e = document.getElementById(id); if (e) e.textContent = v; }
+function FN(n, d = 1) { if (n === 0) return '0'; if (n % 1 === 0) return String(Math.round(n)); return n.toFixed(d); }
+function FMN(n) { return Math.round(n).toLocaleString('fr-FR'); }
+function addM(d, m) { const r = new Date(d); r.setMonth(r.getMonth() + m); return r; }
+function fmtML(d) { return d.toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'}); }
+function fmtD(d) { return d.toLocaleDateString('fr-FR', {day: 'numeric', month: 'long', year: 'numeric'}); }
+function fmtM(d) { return d.toLocaleDateString('fr-FR', {month: 'short', year: '2-digit'}); }
+function setN(id, v) { const e = document.getElementById(id); if (e) e.value = Math.round(v * 10) / 10; }
+
+// ═══════════════════════════════════════════════════════
+// OPTION CCN À RECETTER
+// ═══════════════════════════════════════════════════════
+function toggleOpt() {
+  _OPT_RECETTER = !_OPT_RECETTER;
+  const row = document.getElementById('OPT-recetter');
+  const chk = document.getElementById('OPT-chk');
+  if (_OPT_RECETTER) { row.classList.add('active'); chk.textContent = '✓'; }
+  else { row.classList.remove('active'); chk.textContent = ''; }
+  if (_LOADED.dos && _LOADED.fonc) ANALYZE();
+}
+
+// ═══════════════════════════════════════════════════════
+// IMPORT FICHIERS
+// ═══════════════════════════════════════════════════════
+function dzO(e, id) { e.preventDefault(); document.getElementById(id).classList.add('drag'); }
+function dzL(id) { document.getElementById(id).classList.remove('drag'); }
+function dzD(e, type) { e.preventDefault(); dzL('IZ-' + type); loadF({files: e.dataTransfer.files}, type); }
+
+function loadF(input, type) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
+      _RAW[type] = wb;
+      _LOADED[type] = true;
+      const iz = document.getElementById('IZ-' + type);
+      if (iz) { iz.classList.add('done'); iz.querySelector('.iz-lbl').textContent = '✅ ' + file.name; }
+      SET('ST-' + type, file.name + ' — ' + Math.round(file.size / 1024) + ' Ko');
+      if (type === 'ccn') SET('ST-ccn', '✅ Table personnalisée chargée : ' + file.name);
+      // Auto-analyser dès que les 2 fichiers obligatoires sont là
+      if (_LOADED.dos && _LOADED.fonc) {
+        const st = document.getElementById('O-import-status');
+        if (st) { st.className = 'al ok'; st.textContent = '✅ Fichiers chargés — Analyse en cours…'; }
+        setTimeout(ANALYZE, 100);
+      }
+    } catch(err) {
+      SET('ST-' + type, '❌ Erreur : ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ═══════════════════════════════════════════════════════
+// CONSTRUCTION TABLE CCN CUSTOM
+// ═══════════════════════════════════════════════════════
+function buildCCNTable(wb) {
+  try {
+    const wsE = wb.Sheets['extract silae'];
+    const wsR = wb.Sheets['table ref Wagyz'];
+    if (!wsE || !wsR) return CCN_TABLE;
+    const ext = XLSX.utils.sheet_to_json(wsE, {header: 1, defval: ''});
+    const ref = XLSX.utils.sheet_to_json(wsR, {header: 1, defval: ''});
+    const idccSt = {};
+    for (let i = 1; i < ref.length; i++) {
+      if (ref[i][0]) { const n = String(ref[i][0]); idccSt[n.substring(0, 4)] = {statut: ref[i][1] || 'Non référencée', nom: n}; }
+    }
+    const t = {};
+    for (let i = 1; i < ext.length; i++) {
+      if (ext[i][6]) {
+        const code = String(ext[i][6]).trim(), idcc = String(ext[i][8] || '').trim(), lib = String(ext[i][7] || '').trim();
+        if (!t[code]) { const w = idccSt[idcc] || {statut: 'Non référencée dans Wagyz'}; t[code] = {idcc, libelle: lib, statut: w.statut}; }
+      }
+    }
+    return Object.keys(t).length > 0 ? t : CCN_TABLE;
+  } catch(e) { return CCN_TABLE; }
+}
+
+// ═══════════════════════════════════════════════════════
+// ANALYSE PRINCIPALE — LOGIQUE COMBINÉE PAR DOSSIER
+// ═══════════════════════════════════════════════════════
+function ANALYZE() {
+  if (!_LOADED.dos || !_LOADED.fonc) return;
+
+  const ccnTable = (_RAW.ccn) ? buildCCNTable(_RAW.ccn) : CCN_TABLE;
+
+  // 1. CP Silae (col F = index 5)
+  const cpSet = new Set();
+  const wsFonc = _RAW.fonc.Sheets[_RAW.fonc.SheetNames[0]];
+  const fonc = XLSX.utils.sheet_to_json(wsFonc, {header: 1, defval: ''});
+  for (let i = 1; i < fonc.length; i++) {
+    if (fonc[i][0] && String(fonc[i][5]).trim().toUpperCase() === 'X') cpSet.add(String(fonc[i][0]).trim());
+  }
+
+  // 2. Analyser chaque dossier
+  const wsDos = _RAW.dos.Sheets[_RAW.dos.SheetNames[0]];
+  const dos = XLSX.utils.sheet_to_json(wsDos, {header: 1, defval: '', range: 3});
+  const dossiers = [];
+
+  for (const row of dos) {
+    if (!row[0]) continue;
+    const num = String(row[0]).trim();
+    const nom = String(row[1] || '').trim();
+    const mode = String(row[6] || '').trim();
+    const nbSal = parseInt(row[10]) || 0;
+    const coffre = parseInt(row[12]) || 0;
+    const isMAD = mode === 'Mise à disposition';
+    const hasCp = cpSet.has(num);
+
+    // CCN du dossier (col 26 → 40)
+    const ccns = [];
+    for (let c = 26; c < 41; c++) {
+      const v = String(row[c] || '').trim();
+      if (v && v.length >= 4) {
+        const code = v.substring(0, 4);
+        const info = ccnTable[code] || {idcc: '?', libelle: v, statut: 'Non référencée dans Wagyz'};
+        ccns.push({code, libelle: info.libelle, statut: info.statut});
+      }
+    }
+
+    // ─── LOGIQUE COMBINÉE ───
+    // Critères bloquants absolus
+    const blCcn = ccns.filter(c => ['Non référencée dans Wagyz', 'Recette bloquée', 'non commencé'].includes(c.statut));
+    const ccnRecetter = ccns.filter(c => ['A recetter', 'En cours de paramétrage'].includes(c.statut));
+
+    const bloquants = [];
+    if (hasCp) bloquants.push('Gestion CP Silae (non disponible sur Wagyz)');
+    for (const c of blCcn) bloquants.push(`CCN ${c.code} (${c.libelle || c.code}) non couverte par Wagyz`);
+
+    // CCN à recetter : bloquant selon option et taille
+    if (ccnRecetter.length > 0 && bloquants.length === 0) {
+      if (!_OPT_RECETTER) {
+        for (const c of ccnRecetter) bloquants.push(`CCN ${c.code} à recetter (option non activée)`);
+      } else if (nbSal >= 10) {
+        for (const c of ccnRecetter) bloquants.push(`CCN ${c.code} à recetter — ≥10 sal. (trop risqué)`);
+      }
+    }
+
+    // Statut et vague
+    let vague, raison = '', sousConditions = false;
+    if (bloquants.length > 0) {
+      vague = 'NM';
+      raison = bloquants.join(' | ');
+    } else {
+      if (ccnRecetter.length > 0 && _OPT_RECETTER && nbSal < 10) {
+        vague = 'V2';
+        raison = `CCN ${ccnRecetter[0].code} à recetter — placé V2 (option activée, <10 sal.)`;
+        sousConditions = true;
+      } else if (isMAD || nbSal >= 50) {
+        vague = 'V3';
+      } else if (nbSal >= 10) {
+        vague = 'V2';
+      } else {
+        vague = 'V1';
+      }
+    }
+
+    // Charge réelle (1h + 3min/sal), coefficient MAD ×1.8
+    const chargeH = ((60 + nbSal * 3) / 60) * (isMAD ? 1.8 : 1.0);
+
+    dossiers.push({num, nom, mode, nbSal, coffre, isMAD, hasCp, ccns, blCcn, ccnRecetter, bloquants, vague, raison, sousConditions, chargeH});
+  }
+
+  _DOSSIERS = dossiers;
+
+  // ─── STATISTIQUES — mutuellement exclusives ───
+  const v1 = dossiers.filter(d => d.vague === 'V1');
+  const v2 = dossiers.filter(d => d.vague === 'V2');
+  const v3 = dossiers.filter(d => d.vague === 'V3');
+  const nm = dossiers.filter(d => d.vague === 'NM');
+  const mig = [...v1, ...v2, ...v3];
+
+  // Décomposition NM sans chevauchement
+  const nm_cp_only = nm.filter(d => d.hasCp && d.blCcn.length === 0);
+  const nm_ccn_only = nm.filter(d => !d.hasCp && d.blCcn.length > 0);
+  const nm_both = nm.filter(d => d.hasCp && d.blCcn.length > 0);
+  const total = dossiers.length;
+
+  // Vérification : total doit être exact
+  const check = v1.length + v2.length + v3.length + nm.length;
+  const checkOk = check === total;
+
+  const chargeTotale = mig.reduce((s, d) => s + d.chargeH, 0);
+  const src = GS('I-src');
+  const sf = src === 'silae' ? 0.5 : 1.0;
+  const chargeAppliquee = chargeTotale * sf;
+  const jhTotal = chargeAppliquee / 7;
+  const madMig = mig.filter(d => d.isMAD).length;
+  const coffreMig = mig.filter(d => d.coffre > 0).length;
+
+  // CCN uniques présentes
+  const ccnMap = {};
+  for (const d of dossiers) {
+    for (const c of d.ccns) {
+      if (!ccnMap[c.code]) ccnMap[c.code] = {code: c.code, libelle: c.libelle, statut: c.statut, count: 0};
+      ccnMap[c.code].count++;
+    }
+  }
+
+  _STATS = {v1, v2, v3, nm, mig, nm_cp_only, nm_ccn_only, nm_both, total, check, checkOk, chargeTotale, chargeAppliquee, jhTotal, madMig, coffreMig, ccnMap, sf};
+
+  updateImportUI();
+  updateAnalyseUI();
+  updateVaguesUI();
+  renderVagues();
+  CALC();
+  setTimeout(roiAutoFill, 100);
+}
+
+// ═══════════════════════════════════════════════════════
+// MISE À JOUR UI — IMPORT
+// ═══════════════════════════════════════════════════════
+function updateImportUI() {
+  const S = _STATS;
+  document.getElementById('O-import-cards').style.display = 'grid';
+  SET('OI-total', FMN(S.total));
+  SET('OI-mig', FMN(S.mig.length));
+  document.getElementById('OI-mig-s').textContent = Math.round(S.mig.length / S.total * 100) + '% du portefeuille';
+  const cond = S.mig.filter(d => d.sousConditions).length;
+  SET('OI-cond', FMN(cond));
+  document.getElementById('OI-cond-s').textContent = 'CCN à recetter';
+  SET('OI-nm', FMN(S.nm.length));
+  document.getElementById('OI-nm-s').textContent = Math.round(S.nm.length / S.total * 100) + '% du portefeuille';
+  const cpTotal = S.nm_cp_only.length + S.nm_both.length;
+  SET('OI-cp', FMN(cpTotal));
+  document.getElementById('OI-cp-s').textContent = Math.round(cpTotal / S.total * 100) + '% du portefeuille';
+
+  const st = document.getElementById('O-import-status');
+  if (st) { st.className = 'al ok'; st.textContent = `✅ Analyse terminée — ${FMN(S.total)} dossiers · ${FMN(S.mig.length)} migrables · ${FMN(S.nm.length)} non migrables`; }
+
+  const topBdg = document.getElementById('TOP');
+  if (topBdg) {
+    const pct = Math.round(S.mig.length / S.total * 100);
+    topBdg.className = 'bdg ' + (pct > 50 ? 'ok' : pct > 25 ? 'wa' : 'da');
+    topBdg.textContent = `Migrabilité : ${pct}% (${FMN(S.mig.length)}/${FMN(S.total)})`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// MISE À JOUR UI — ANALYSE
+// ═══════════════════════════════════════════════════════
+function updateAnalyseUI() {
+  const S = _STATS;
+  document.getElementById('O-ana-wait').style.display = 'none';
+  document.getElementById('O-ana-content').style.display = 'block';
+
+  SET('OA-total', FMN(S.total));
+  const pctMig = Math.round(S.mig.length / S.total * 100);
+  const bdg = document.getElementById('OA-badge');
+  if (bdg) { bdg.className = 'bdg ' + (pctMig > 50 ? 'ok' : pctMig > 25 ? 'wa' : 'da'); bdg.textContent = `Migrabilité : ${pctMig}%`; }
+
+  // Barres mutuellement exclusives
+  function setBar(id, valId, count) {
+    const pct = Math.round(count / S.total * 100);
+    const el = document.getElementById(id);
+    if (el) { el.style.width = pct + '%'; el.textContent = pct > 5 ? pct + '%' : ''; }
+    SET(valId, `${FMN(count)} dos. (${pct}%)`);
+  }
+  setBar('BA-v1', 'BV-v1', S.v1.length);
+  setBar('BA-v2', 'BV-v2', S.v2.length);
+  setBar('BA-v3', 'BV-v3', S.v3.length);
+  setBar('BA-nm-ccn', 'BV-nm-ccn', S.nm_ccn_only.length);
+  setBar('BA-nm-cp', 'BV-nm-cp', S.nm_cp_only.length);
+  setBar('BA-nm-both', 'BV-nm-both', S.nm_both.length);
+
+  // Vérification cohérence
+  const checkEl = document.getElementById('OA-check');
+  if (checkEl) {
+    checkEl.textContent = S.checkOk
+      ? `✅ Cohérence vérifiée : ${S.v1.length}+${S.v2.length}+${S.v3.length}+${S.nm.length} = ${S.total} dossiers (0 chevauchement)`
+      : `⚠ Incohérence : total=${S.check} ≠ ${S.total}`;
+    checkEl.style.color = S.checkOk ? 'var(--tx-ok)' : 'var(--tx-da)';
+  }
+
+  // Cartes
+  const jh = S.jhTotal;
+  SET('OA-jh', FN(jh) + ' JH');
+  document.getElementById('OA-jh-s').textContent = (GS('I-src') === 'silae' ? '-50% Silae appliqué' : 'Sans gain Silae') + ` · ${S.mig.length} dossiers`;
+  const moyMin = S.mig.length > 0 ? Math.round(S.chargeTotale / S.mig.length * 60) : 0;
+  SET('OA-moy', moyMin + ' min');
+  SET('OA-mad', FMN(S.madMig));
+  document.getElementById('OA-mad-s').textContent = Math.round(S.madMig / S.mig.length * 100) + '% des migrables — Vague 3';
+  SET('OA-cf', FMN(S.coffreMig));
+
+  // CCN grid
+  const grid = document.getElementById('OA-ccn-grid');
+  if (grid) {
+    grid.innerHTML = Object.values(S.ccnMap).sort((a, b) => b.count - a.count).map(c => {
+      const cls = c.statut === 'En production' || c.statut === 'Paramétrage finalisé' ? 'pill-ok' :
+                  c.statut === 'A recetter' || c.statut === 'En cours de paramétrage' ? 'pill-wa' : 'pill-da';
+      return `<div style="background:var(--cbs);border-radius:6px;padding:7px 9px;border:1px solid var(--bdt)">
+        <div style="display:flex;align-items:center;gap:5px;margin-bottom:2px">
+          <span class="pill ${cls}">${c.code}</span>
+          <strong style="font-size:11px">${c.count} dos.</strong>
+        </div>
+        <div style="font-size:10px;color:var(--cts);margin-bottom:2px">${c.libelle ? c.libelle.substring(0, 35) : ''}${(c.libelle || '').length > 35 ? '…' : ''}</div>
+        <div style="font-size:9px;font-weight:600;color:${c.statut === 'En production' ? 'var(--tx-ok)' : c.statut === 'A recetter' ? 'var(--tx-wa)' : 'var(--tx-da)'}">${c.statut}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Raisons de blocage
+  const raisons = document.getElementById('OA-raisons');
+  if (raisons) {
+    const cpPct = Math.round((S.nm_cp_only.length + S.nm_both.length) / S.total * 100);
+    const ccnPct = Math.round((S.nm_ccn_only.length + S.nm_both.length) / S.total * 100);
+    raisons.innerHTML = `
+      <div class="al da">🔒 <strong>CP Silae</strong> — ${FMN(S.nm_cp_only.length + S.nm_both.length)} dossiers bloqués (${cpPct}% du portefeuille). Solution : migration vers Staff&Go (gestion CP) ou attente disponibilité Wagyz.</div>
+      <div class="al da">🚫 <strong>CCN non couverte</strong> — ${FMN(S.nm_ccn_only.length + S.nm_both.length)} dossiers bloqués (${ccnPct}% du portefeuille). Certaines peuvent être paramétrées sur demande à Wagyz.</div>
+      ${S.nm_both.length > 0 ? `<div class="al da">⚠ <strong>Double blocage</strong> — ${FMN(S.nm_both.length)} dossiers cumulent CP Silae ET CCN manquante (comptés une seule fois dans le total non migrables).</div>` : ''}
+    `;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// MISE À JOUR UI — VAGUES
+// ═══════════════════════════════════════════════════════
+function updateVaguesUI() {
+  const S = _STATS;
+  document.getElementById('O-vag-wait').style.display = 'none';
+  document.getElementById('O-vag-content').style.display = 'block';
+  SET('OV-v1', FMN(S.v1.length)); SET('OV-v2', FMN(S.v2.length));
+  SET('OV-v3', FMN(S.v3.length)); SET('OV-nm', FMN(S.nm.length));
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDU TABLEAU VAGUES
+// ═══════════════════════════════════════════════════════
+function renderVagues() {
+  const filtre = GS('V-filtre'), search = (GS('V-search') || '').toLowerCase();
+  const dossiers = _DOSSIERS || [];
+  let filtered = dossiers.filter(d => {
+    if (filtre !== 'tous' && d.vague !== filtre) return false;
+    if (search && !d.nom.toLowerCase().includes(search) && !d.num.toLowerCase().includes(search)) return false;
+    return true;
+  });
+  SET('V-count', filtered.length + ' dossier(s)');
+
+  const lbl = {V1: 'Vague 1', V2: 'Vague 2', V3: 'Vague 3', NM: 'Non migrable'};
+  const tbody = document.getElementById('O-dos-body');
+  if (!tbody) return;
+
+  tbody.innerHTML = filtered.map(d => {
+    const cls = {V1: 'v1', V2: 'v2', V3: 'v3', NM: 'nm'}[d.vague] || '';
+    const cpPill = d.hasCp ? '<span class="pill pill-da">🔒 CP</span>' : '<span class="pill pill-grey">Non</span>';
+    const cfPill = d.coffre ? '<span class="pill pill-inf">📦</span>' : '—';
+    const modePill = d.isMAD ? '<span class="pill pill-wa">MAD</span>' : '<span class="pill pill-inf">Ext.</span>';
+    const ccnHtml = d.ccns.map(c => {
+      const cls2 = c.statut === 'En production' ? 'pill-ok' : c.statut === 'A recetter' ? 'pill-wa' : 'pill-da';
+      return `<span class="pill ${cls2}" title="${c.statut}">${c.code}</span>`;
+    }).join('');
+    const vagPill = d.vague === 'NM'
+      ? '<span class="pill pill-da">Non migrable</span>'
+      : `<span class="pill pill-${d.vague === 'V1' ? 'ok' : d.vague === 'V2' ? 'inf' : 'wa'}">${lbl[d.vague]}</span>`;
+    const raison = d.raison ? `<span style="font-size:9px;color:var(--tx-da)">${d.raison.substring(0, 70)}${d.raison.length > 70 ? '…' : ''}</span>` : '—';
+    const chargeMin = Math.round(d.chargeH * 60);
+    return `<tr class="${cls}"><td><strong>${d.num}</strong></td><td>${d.nom}</td><td>${d.nbSal}</td><td>${modePill}</td><td>${ccnHtml}</td><td>${cpPill}</td><td>${cfPill}</td><td>${chargeMin}min</td><td>${vagPill}${d.sousConditions ? ' <span class="pill pill-wa">⚠</span>' : ''}</td><td>${raison}</td></tr>`;
+  }).join('');
+
+  if (filtered.length === 0) tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--ctt);padding:20px">Aucun dossier pour ce filtre</td></tr>';
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORT EXCEL
+// ═══════════════════════════════════════════════════════
+function EXPORT() {
+  const dossiers = _DOSSIERS;
+  if (!dossiers || dossiers.length === 0) { alert('Lancez d\'abord l\'analyse.'); return; }
+
+  const vagLbl = {V1: 'Vague 1 — Simples (<10 sal.)', V2: 'Vague 2 — Standards (10-49 sal.)', V3: 'Vague 3 — Complexes/MAD (≥50 sal.)', NM: 'Non migrable'};
+  const header = ['N° Dossier', 'Raison sociale', 'Nb salariés', 'Mode', 'CCN (codes Silae)', 'Statut CCN', 'Gestion CP Silae', 'Coffre-fort Silae', 'Charge estimée (min)', 'Vague', 'Sous conditions CCN', 'Raison du blocage / note'];
+  const rows = dossiers.map(d => [
+    d.num, d.nom, d.nbSal,
+    d.isMAD ? 'Mise à disposition' : 'Externalisation',
+    d.ccns.map(c => c.code).join(' / '),
+    d.ccns.map(c => `${c.code}: ${c.statut}`).join(' | '),
+    d.hasCp ? 'Oui' : 'Non',
+    d.coffre > 0 ? 'Oui' : 'Non',
+    Math.round(d.chargeH * 60),
+    vagLbl[d.vague] || d.vague,
+    d.sousConditions ? 'Oui' : 'Non',
+    d.raison || ''
+  ]);
+
+  const wb = XLSX.utils.book_new();
+
+  // Onglet principal
+  const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+  ws['!cols'] = [10, 35, 8, 16, 20, 40, 12, 12, 14, 30, 12, 60].map(w => ({wch: w}));
+  XLSX.utils.book_append_sheet(wb, ws, 'Plan de migration');
+
+  // Onglet résumé
+  const S = _STATS;
+  const cpTotal = S.nm_cp_only.length + S.nm_both.length;
+  const resume = [
+    ['Plan de migration Wagyz — Résumé', '', ''],
+    ['Généré le', new Date().toLocaleDateString('fr-FR'), ''],
+    ['Option CCN à recetter incluse', _OPT_RECETTER ? 'Oui' : 'Non', ''],
+    ['', '', ''],
+    ['Catégorie', 'Nb dossiers', '% portefeuille'],
+    ['Total dossiers', S.total, '100%'],
+    ['─── Migrables ───', '', ''],
+    ['Vague 1 — Simples (<10 sal., Ext., CCN prod.)', S.v1.length, Math.round(S.v1.length / S.total * 100) + '%'],
+    ['Vague 2 — Standards (10-49 sal., Ext.)', S.v2.length, Math.round(S.v2.length / S.total * 100) + '%'],
+    ['Vague 3 — Complexes (MAD + ≥50 sal.)', S.v3.length, Math.round(S.v3.length / S.total * 100) + '%'],
+    ['Total migrables', S.mig.length, Math.round(S.mig.length / S.total * 100) + '%'],
+    ['─── Non migrables ───', '', ''],
+    ['Bloqués CP Silae seul', S.nm_cp_only.length, Math.round(S.nm_cp_only.length / S.total * 100) + '%'],
+    ['Bloqués CCN seule', S.nm_ccn_only.length, Math.round(S.nm_ccn_only.length / S.total * 100) + '%'],
+    ['Bloqués CP Silae + CCN cumulés', S.nm_both.length, Math.round(S.nm_both.length / S.total * 100) + '%'],
+    ['Total non migrables', S.nm.length, Math.round(S.nm.length / S.total * 100) + '%'],
+    ['─── Charge ───', '', ''],
+    ['Charge brute dossiers migrables (h)', Math.round(S.chargeTotale), ''],
+    ['Gain Silae appliqué', S.sf === 0.5 ? '-50%' : '0%', ''],
+    ['Charge nette (JH à 7h)', Math.round(S.jhTotal), ''],
+    ['dont MAD migrables (×1.8)', S.madMig, ''],
+    ['Coffres-forts à mentionner aux clients', S.coffreMig, ''],
+  ];
+  const wsR = XLSX.utils.aoa_to_sheet(resume);
+  wsR['!cols'] = [{wch: 45}, {wch: 15}, {wch: 15}];
+  XLSX.utils.book_append_sheet(wb, wsR, 'Résumé');
+
+  XLSX.writeFile(wb, 'Plan_migration_Wagyz_' + new Date().toISOString().split('T')[0] + '.xlsx');
+}
+
+// ═══════════════════════════════════════════════════════
+// CALC — DURÉE & PLANNING (basé sur charge réelle)
+// ═══════════════════════════════════════════════════════
+function CALC() {
+  const gp = GN('N-gp'), etpd = GN('N-etpd'), dgp = GN('N-dgp') / 100;
+  const res = GN('N-res'), sur = GN('N-sur'), abs = GN('N-abs') / 100;
+  const mois = GS('I-mois'), src = GS('I-src');
+  const dsStr = GS('I-dstart'), deStr = GS('I-dend');
+  const ds = dsStr ? new Date(dsStr) : null, de = deStr ? new Date(deStr) : null;
+
+  // Dates
+  const tlW = document.getElementById('O-tl-wrap');
+  if (ds && de && de > ds) {
+    if (tlW) tlW.style.display = 'block';
+    const mo = Math.round((de - ds) / (1000 * 60 * 60 * 24 * 30.5) * 10) / 10;
+    SET('O-dstart-l', fmtD(ds)); SET('O-dend-l', fmtD(de)); SET('O-dend-i', FN(mo) + ' mois de projet');
+    const now = new Date(), pct2 = Math.min(98, Math.max(2, Math.round((now - ds) / (de - ds) * 100)));
+    const bar = document.getElementById('O-tl-bar');
+    if (bar) { bar.style.width = pct2 + '%'; bar.textContent = pct2 + '% écoulé'; }
+    const lbl = document.getElementById('O-tl-lbls');
+    if (lbl) lbl.innerHTML = `<span>${fmtM(ds)}</span><span style="font-weight:700">Auj.</span><span>${fmtM(de)}</span>`;
+    const tla = document.getElementById('O-tl-alert');
+    if (tla) {
+      const em = de.getMonth();
+      tla.className = em <= 2 ? 'al ok' : 'al wa';
+      tla.textContent = em <= 2 ? 'Fin janv-mars — idéale pour MAD et dossiers complexes.' : em <= 5 ? 'Fin avr-juin — acceptable.' : 'Fin juil-déc — déconseillée pour MAD/complexes.';
+    }
+  } else {
+    if (tlW) tlW.style.display = 'none';
+  }
+
+  // Capacité et engagement
+  const sf = src === 'silae' ? 0.5 : 1.0;
+  const capBrut = (etpd * 22 + gp * dgp * 22) * Math.max(0.5, 1 - abs * 0.7);
+  const cap = Math.max(1, Math.round(capBrut));
+  const engRaw = Math.min(1, (etpd * 0.5 + gp * dgp * 0.5) / Math.max(gp * 0.3, 1));
+  const penFact = 1 - (res / 10) * 0.15 - (sur / 10) * 0.10;
+  const engp = Math.max(10, Math.min(100, Math.round(engRaw * penFact * 100)));
+  const coefEng = engp > 70 ? 1.0 : Math.min(1.5, 1 + (70 - engp) / 150);
+  SET('O-cap', cap + ' j/mois');
+  SET('O-eng', engp + '%');
+  const engEl = document.getElementById('O-eng-s');
+  if (engEl) { engEl.textContent = engp > 65 ? 'Bon' : engp > 40 ? 'Moyen' : 'Insuffisant'; engEl.style.color = engp > 65 ? 'var(--tx-ok)' : engp > 40 ? 'var(--tx-wa)' : 'var(--tx-da)'; }
+  SET('O-coef', '×' + FN(coefEng, 2));
+
+  // Info équipes
+  const eqInfo = document.getElementById('O-eq-info');
+  if (eqInfo) {
+    if (_STATS) {
+      const jhB = _STATS.jhTotal;
+      const dureeBase = jhB / Math.max(cap, 1);
+      eqInfo.className = 'al ' + (dureeBase > 24 ? 'da' : dureeBase > 12 ? 'wa' : 'ok');
+      eqInfo.textContent = `Charge réelle : ${FN(jhB)} JH pour ${FMN(_STATS.mig.length)} dossiers migrables · Durée nominale avec capacité actuelle : ${FN(dureeBase)} mois`;
+    } else {
+      eqInfo.className = 'al inf';
+      eqInfo.textContent = 'Importez les fichiers Silae pour obtenir la charge réelle de migration.';
+    }
+  }
+
+  if (!_STATS) return;
+
+  // Durée basée sur charge réelle (pas de moyennes fictives)
+  const jhTotal = _STATS.jhTotal;
+  const nmMad = _STATS.madMig;
+  const durBase = jhTotal / Math.max(cap, 1);
+  const buf_p = durBase * 0.30, buf_s = durBase * 0.15;
+  let dur_p = Math.max(2, Math.round((durBase + buf_p) * coefEng * 10) / 10);
+  let dur_s = Math.max(1, Math.round((durBase + buf_s) * coefEng * 10) / 10);
+  let dur_a = Math.max(1, Math.round(durBase * Math.max(0.85, coefEng * 0.9) * 10) / 10);
+  if (nmMad > 0) { dur_p += 2; dur_s += 1; dur_a += 1; }
+  dur_p = Math.min(36, dur_p); dur_s = Math.min(30, dur_s); dur_a = Math.min(24, dur_a);
+  const nV = {prudent: Math.max(1, Math.ceil(dur_p / 6)), standard: Math.max(1, Math.ceil(dur_s / 6)), ambitieux: Math.max(1, Math.ceil(dur_a / 6))};
+
+  // Recommandation
+  const engScore = engp < 40 ? 0 : engp < 65 ? 1 : 2;
+  let recAxe = 'standard';
+  if (engScore === 0 || nmMad > 20) recAxe = 'prudent';
+  else if (engScore === 2 && nmMad === 0) recAxe = 'ambitieux';
+
+  const AX = {
+    prudent: {col: '#0F6E56', bg: 'var(--bg-ok)', bc: 'var(--bd-ok)', lbl: 'Prudent', dur: dur_p, nv: nV.prudent, desc: 'Buffer +30% · Risque faible · Idéal si équipe peu disponible.', bdg: 'Sécurisé'},
+    standard: {col: '#185FA5', bg: 'var(--bg-inf)', bc: 'var(--bd-inf)', lbl: 'Standard', dur: dur_s, nv: nV.standard, desc: 'Buffer +15% · Équilibre risque/délai · Approche recommandée.', bdg: 'Équilibré'},
+    ambitieux: {col: '#7D4A08', bg: 'var(--bg-wa)', bc: 'var(--bd-wa)', lbl: 'Ambitieux', dur: dur_a, nv: nV.ambitieux, desc: 'Pas de buffer · Engagement maximal requis.', bdg: 'Rapide'}
+  };
+
+  // Bannière
+  const rb = document.getElementById('O-rec-banner');
+  if (rb) { const a = AX[recAxe]; rb.innerHTML = `<div class="al ok" style="border-color:${a.bc};background:${a.bg};margin-bottom:12px"><strong style="color:${a.col};font-size:13px">Axe recommandé : ${a.lbl} — ${FN(a.dur)} mois</strong><br><span style="font-size:11px">${a.desc} Charge réelle : ${FN(jhTotal)} JH · Capacité : ${cap} j/mois · ${FMN(_STATS.mig.length)} dossiers migrables.</span></div>`; }
+
+  // Axes
+  const ag = document.getElementById('O-axes');
+  if (ag) {
+    ag.innerHTML = ['prudent', 'standard', 'ambitieux'].map(k => {
+      const ax = AX[k], isSel = (k === _SC), isRec = (k === recAxe);
+      return `<div class="axe${isSel ? ' sel' : ''}" onclick="SEL('${k}')" style="border-color:${isSel ? ax.bc : 'var(--bdt)'};background:${isSel ? ax.bg : 'var(--cbp)'}">
+        <div class="axe-tag" style="color:${ax.col}">${ax.lbl}${isRec ? ' ★' : ''}</div>
+        <div class="axe-dur" style="color:${ax.col}">${FN(ax.dur)} mois</div>
+        <div class="axe-row">${ax.nv} vague(s) · ${cap} j/mois</div>
+        <div class="axe-row">${FN(jhTotal)} JH · ×${FN(coefEng, 2)}</div>
+        ${nmMad > 0 ? `<div class="axe-row" style="color:var(--tx-wa)">${FMN(nmMad)} MAD — sprint 3, janv-mars</div>` : ''}
+        <span class="axe-bdg" style="background:${ax.bg};color:${ax.col}">${ax.bdg}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Comparatif
+  const cmb = document.getElementById('O-cmp');
+  if (cmb) {
+    cmb.innerHTML = [
+      ['Durée totale', FN(dur_p) + ' mois', FN(dur_s) + ' mois', FN(dur_a) + ' mois'],
+      ['Nb de vagues', String(nV.prudent), String(nV.standard), String(nV.ambitieux)],
+      ['Buffer', '+30%', '+15%', '0%'],
+      ['Charge (JH)', FN(jhTotal), FN(jhTotal), FN(jhTotal)],
+      ['Capacité', cap + ' j/mois', cap + ' j/mois', cap + ' j/mois'],
+      ['Risque', 'Faible', 'Modéré', 'Élevé']
+    ].map(r => `<tr><td style="font-weight:600;color:var(--cts)">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('');
+  }
+
+  // Risques
+  const S = _STATS;
+  const cpPct = Math.round((S.nm_cp_only.length + S.nm_both.length) / S.total * 100);
+  const rks = [
+    {l: `Capacité (${cap} j/mois)`, s: cap < 10 ? 'da' : cap < 20 ? 'wa' : 'ok'},
+    {l: `Engagement (${engp}%)`, s: engp < 40 ? 'da' : engp < 65 ? 'wa' : 'ok'},
+    {l: `CP Silae bloquants (${cpPct}% du portef.)`, s: cpPct > 50 ? 'da' : cpPct > 20 ? 'wa' : 'ok'},
+    {l: `MAD migrables (${FMN(nmMad)})`, s: nmMad > 30 ? 'wa' : 'ok'},
+    {l: `Migrabilité (${Math.round(S.mig.length / S.total * 100)}%)`, s: S.mig.length / S.total < 0.15 ? 'da' : S.mig.length / S.total < 0.40 ? 'wa' : 'ok'},
+    {l: 'Bascule MAD/complexes', s: mois === 'mau' ? 'da' : mois === 'moy' ? 'wa' : 'ok'},
+  ];
+  const rl = document.getElementById('O-risks');
+  if (rl) rl.innerHTML = rks.map(r => `<div class="rrow"><div class="rdot" style="background:${r.s === 'ok' ? '#1D9E75' : r.s === 'wa' ? '#EF9F27' : '#E24B4A'}"></div><span style="flex:1">${r.l}</span><span class="bdg ${r.s}">${r.s === 'ok' ? 'Maîtrisé' : r.s === 'wa' ? 'Vigilance' : 'Critique'}</span></div>`).join('');
+
+  // Planning
+  const axSel = AX[_SC], durPlan = axSel.dur;
+  const startDate = ds ? new Date(ds) : new Date();
+  const totalMois = Math.max(2, Math.ceil(durPlan));
+  const pb2 = document.getElementById('O-plan-banner');
+  if (pb2) { pb2.className = 'al ' + (_SC === 'prudent' ? 'ok' : _SC === 'ambitieux' ? 'wa' : 'inf'); pb2.textContent = `Axe ${axSel.lbl} — ${FN(durPlan)} mois · ${axSel.nv} vague(s) · ${FMN(S.mig.length)} dossiers migrables · ${FN(jhTotal)} JH réels · Capacité ${cap} j/mois`; }
+  SET('O-plan-axe', axSel.lbl); SET('O-plan-dur', FN(durPlan) + ' mois');
+  SET('O-plan-durs', _SC === recAxe ? 'axe recommandé' : '(recommandé : ' + AX[recAxe].lbl + ')');
+  const finDate = addM(startDate, totalMois);
+  SET('O-plan-fin', fmtML(finDate));
+  const bw = mois === 'mau' && nmMad > 0 ? 'Bascule MAD déconseillée juil-déc' : '';
+  SET('O-plan-bwarn', bw);
+
+  const phases = [
+    {l: 'Diagnostic & cartographie', s: 0, len: .10, c: '#534AB7'},
+    {l: 'Paramétrage & formation GP', s: .08, len: .20, c: '#185FA5'},
+    {l: `Vague 1 — Simples (${FMN(S.v1.length)} dos.)`, s: .28, len: .22, c: '#1D9E75'},
+    {l: `Vague 2 — Standards (${FMN(S.v2.length)} dos.)`, s: .50, len: .22, c: '#3B6D11'},
+    {l: `Vague 3 — MAD/50+ (${FMN(S.v3.length)} dos.)`, s: .72, len: .18, c: '#BA7517'},
+    {l: 'Recette & bascule finale', s: .90, len: .10, c: '#993C1D'}
+  ];
+
+  const ma = document.getElementById('O-m-axis');
+  if (ma) { ma.innerHTML = ''; for (let i = 0; i < Math.min(totalMois, 18); i++) { const md = addM(startDate, i); ma.innerHTML += `<div class="m-tick">${md.toLocaleDateString('fr-FR', {month: 'short'})}</div>`; } }
+  const pt = document.getElementById('O-ph-tl');
+  if (pt) pt.innerHTML = phases.map(p => { const pS = addM(startDate, Math.round(p.s * totalMois)); return `<div class="ph-row"><div class="ph-lbl">${p.l}</div><div class="ph-trk"><div class="ph-bar" style="left:${Math.round(p.s*100)}%;width:${Math.round(p.len*100)}%;background:${p.c}">${p.l.split(' ')[0]} (${pS.toLocaleDateString('fr-FR',{month:'short',year:'2-digit'})})  </div></div></div>`; }).join('');
+
+  const cal = document.getElementById('O-cal');
+  if (cal) {
+    const pN = ['Diagnostic', 'Formation', 'Vague 1', 'Vague 2', 'Vague 3', 'Recette'];
+    const pC = ['#534AB7', '#185FA5', '#1D9E75', '#3B6D11', '#BA7517', '#993C1D'];
+    let calH = '';
+    for (let ci = 0; ci < Math.min(totalMois, 18); ci++) {
+      const md2 = addM(startDate, ci), mpct = ci / totalMois;
+      let pidx = 0;
+      for (let pj = phases.length - 1; pj >= 0; pj--) { if (mpct >= phases[pj].s) { pidx = pj; break; } }
+      const isJM = md2.getMonth() <= 2;
+      calH += `<div class="cal-m" style="border-color:${pC[pidx]};background:${isJM?'var(--bg-ok)':'var(--cbs)'}"><div style="font-weight:700;color:${pC[pidx]};margin-bottom:2px">${md2.toLocaleDateString('fr-FR',{month:'short'})}</div><div style="font-size:9px;color:${pC[pidx]};line-height:1.3">${pN[pidx]}${isJM?'<br>Jan-Mars':''}</div></div>`;
+    }
+    if (totalMois > 18) calH += `<div class="cal-m"><div style="color:var(--ctt)">+${totalMois-18}m</div></div>`;
+    cal.innerHTML = calH;
+  }
+
+  const jhForm = gp * 3;
+  const jalons = [
+    {pct: 0, lbl: 'Démarrage kick-off', cond: 'Équipe projet · imports Silae validés · option CCN recetter définie', c: '#534AB7'},
+    {pct: .10, lbl: 'Diagnostic validé', cond: `${FMN(S.mig.length)} migrables · ${FMN(S.nm.length)} non migrables identifiés · plan de vagues validé`, c: '#534AB7'},
+    {pct: .22, lbl: `Formation GP (${jhForm} JH)`, cond: `${gp} GP × 3j · avant vague 1 · formation Wagyz + outils migration`, c: '#185FA5'},
+    {pct: .30, lbl: `Vague 1 — ${FMN(S.v1.length)} dossiers`, cond: 'Externalisation · CCN en production · <10 sal. · hors période de paie', c: '#1D9E75'},
+    {pct: .52, lbl: `Vague 2 — ${FMN(S.v2.length)} dossiers`, cond: 'Externalisation · 10-49 sal. · recette continue' + (S.v2.filter(d=>d.sousConditions).length > 0 ? ` · ${S.v2.filter(d=>d.sousConditions).length} dos. CCN à recetter` : ''), c: '#3B6D11'},
+    {pct: .72, lbl: `Vague 3 — ${FMN(S.v3.length)} dossiers`, cond: `${FMN(nmMad)} MAD · bascule janv-mars obligatoire · 50+ sal.`, c: '#BA7517'},
+    {pct: .90, lbl: 'Recette finale', cond: 'Bulletins test validés · DSN Wagyz OK · double contrôle', c: '#993C1D'},
+    {pct: 1, lbl: 'Migration complète', cond: `${FMN(S.mig.length)} dossiers migrés · ${FMN(S.nm.length)} différés (CP Silae / CCN)`, c: '#0F6E56'}
+  ];
+  const jl = document.getElementById('O-jalons');
+  if (jl) jl.innerHTML = jalons.map(j => { const jDate = addM(startDate, Math.round(j.pct * totalMois)), isPast = jDate < new Date(); return `<div class="jrow"><div class="jdate" style="color:${j.c}">${jDate.toLocaleDateString('fr-FR',{month:'long',year:'numeric'})}${isPast?' (passé)':''}</div><div class="jdot" style="background:${j.c}"></div><div><div style="font-size:11px;font-weight:600">${j.lbl}</div><div style="font-size:10px;color:var(--cts);margin-top:2px">${j.cond}</div></div></div>`; }).join('');
+
+  // ROI
+  SET('O-rjh', FN(jhTotal) + ' JH');
+  document.getElementById('O-rjh-s').textContent = (src === 'silae' ? '-50% Silae · ' : '') + FMN(S.mig.length) + ' dossiers';
+  SET('O-rform', jhForm + ' JH'); document.getElementById('O-rform-s').textContent = gp + ' GP × 3j';
+  SET('O-rdiff', FMN(S.nm.length));
+  const fsc = Math.max(0, Math.min(100, Math.round(engp * 0.30 + (S.mig.length / S.total * 100) * 0.25 + (_SC === 'standard' ? 20 : _SC === 'prudent' ? 15 : 10) + (coefEng <= 1.1 ? 10 : 0) + (mois === 'bon' ? 10 : mois === 'mau' ? -10 : 0))));
+  SET('O-rscore', fsc + '/100'); document.getElementById('O-rscores').textContent = fsc > 65 ? 'Faisable' : 'Risque identifié';
+
+  const facteurs = [
+    {l: `Capacité mensuelle (${cap} j/mois)`, impact: Math.round(durBase / cap * 10) / 10, desc: '↑ ETP dédiés ou ↑ dispo GP = réduction directe de la durée'},
+    {l: `Coeff. engagement (×${FN(coefEng, 2)})`, impact: Math.round((coefEng - 1) * durBase * 10) / 10, desc: 'Réduire résistance et surcharge → coefficient proche de ×1.0'},
+    {l: `Dossiers MAD (${FMN(nmMad)} · ×1.8 charge)`, impact: nmMad > 0 ? Math.round((dur_s - Math.max(1, Math.round((durBase + buf_s) * coefEng * 10) / 10)) * 10) / 10 : 0, desc: 'Sprint 3 obligatoire · bascule janv-mars · coefficient CDC ×1.8'},
+    {l: `CP Silae (${FMN(S.nm_cp_only.length + S.nm_both.length)} dossiers différés)`, impact: 0, desc: 'Solution : Staff&Go (gestion CP incluse) ou attente fonctionnalité Wagyz'},
+  ].filter(f => f.impact > 0 || f.l.includes('CP')).sort((a, b) => b.impact - a.impact);
+  const fd = document.getElementById('O-facteurs');
+  if (fd) fd.innerHTML = facteurs.map((f, i) => { const pct = Math.min(100, f.impact > 0 ? Math.round(f.impact / durPlan * 100) : 100); const colors = ['#993C1D', '#BA7517', '#7B1D1D', '#185FA5']; return `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="font-weight:700">${f.l}</span><span style="color:var(--cts)">${f.impact > 0 ? '+' + FN(f.impact) + ' mois' : 'bloquant structurel'}</span></div><div class="dur-bar"><div class="dur-fill" style="width:${pct}%;background:${colors[i]}"></div></div><div style="font-size:10px;color:var(--ctt);margin-top:2px">${f.desc}</div></div>`; }).join('');
+
+  const als = [];
+  const cpTotal2 = S.nm_cp_only.length + S.nm_both.length;
+  if (cpTotal2 > 0) als.push({t: 'da', m: `🔒 ${FMN(cpTotal2)} dossiers CP Silae (${Math.round(cpTotal2/S.total*100)}% du portef.) différés. Solution : Staff&Go pour gestion CP + conduite du changement clients.`});
+  if (S.nm_ccn_only.length + S.nm_both.length > 0) als.push({t: 'da', m: `🚫 ${FMN(S.nm_ccn_only.length + S.nm_both.length)} dossiers CCN non couverte. Contacter l'équipe Wagyz pour priorisation du paramétrage.`});
+  if (cap < 10) als.push({t: 'da', m: `Capacité très faible (${cap} j/mois) — facteur principal de durée longue. Augmenter les ETP dédiés.`});
+  if (nmMad > 0) als.push({t: 'wa', m: `${FMN(nmMad)} dossiers MAD migrables : bascule janv-mars obligatoire. Audit OD + formation client ½j + double contrôle 1 mois.`});
+  if (mois === 'bon') als.push({t: 'ok', m: 'Bascule janv-mars ciblée — idéale pour limiter les reprises par cumul.'});
+  if (src === 'silae') als.push({t: 'ok', m: 'Import natif Silae→Wagyz activé : -50% sur la charge de paramétrage.'});
+  if (!als.length) als.push({t: 'ok', m: 'Aucune alerte majeure.'});
+  const ad = document.getElementById('O-alerts');
+  if (ad) ad.innerHTML = als.map(a => `<div class="al ${a.t}">${a.m}</div>`).join('');
+
+  window._CALC_STATE = {gp, etpd, dgp, res, sur, abs, mois, src, cap, engp, coefEng, jhTotal, durBase, dur_p, dur_s, dur_a, recAxe, buf_s, nmMad, sf};
+}
+
+function SEL(s) { _SC = s; CALC(); }
+
+// ═══════════════════════════════════════════════════════
+// BOUTON MAGIQUE
+// ═══════════════════════════════════════════════════════
+function MAGIC() {
+  const w = document.getElementById('O-magic-warn'), r = document.getElementById('O-magic-res');
+  w.style.display = 'none'; r.style.display = 'none';
+  const dsStr = GS('I-dstart'), deStr = GS('I-dend');
+  if (!dsStr || !deStr) { w.textContent = '⚠ Renseignez les dates dans l\'onglet "Équipes & dates".'; w.style.display = 'block'; return; }
+  const ds = new Date(dsStr), de = new Date(deStr);
+  if (de <= ds) { w.textContent = '⚠ La date de fin doit être postérieure au démarrage.'; w.style.display = 'block'; return; }
+  if (!_STATS) { w.textContent = '⚠ Lancez d\'abord l\'analyse des fichiers Silae.'; w.style.display = 'block'; return; }
+  const delai = Math.round((de - ds) / (1000 * 60 * 60 * 24 * 30.5) * 10) / 10;
+  const S = window._CALC_STATE;
+  const durActuelle = S['dur_' + _SC] || S.dur_s;
+  if (delai >= durActuelle) {
+    document.getElementById('O-mr-title').textContent = `✦ Délai compatible — ${FN(durActuelle)} mois < ${FN(delai)} mois disponibles.`;
+    document.getElementById('O-mr-grid').innerHTML = '';
+    document.getElementById('O-mr-detail').textContent = 'Aucun ajustement nécessaire. Vous pouvez opter pour un axe plus prudent si souhaité.';
+    r.style.display = 'block'; return;
+  }
+  const {jhTotal, sf, nmMad, coefEng, durBase, abs, gp} = S;
+  const delaiNet = delai - (nmMad > 0 ? 1 : 0);
+  const capNec = Math.ceil(jhTotal / (delaiNet / Math.max(0.85, coefEng)));
+  const etpdActuel = GN('N-etpd'), dgpActuel = GN('N-dgp') / 100;
+  const etpdNec = Math.max(etpdActuel, Math.ceil(capNec / 22 - gp * dgpActuel));
+  const dgpCible = Math.min(0.50, dgpActuel + Math.max(0, capNec - etpdNec * 22) / (gp * 22));
+  const etpdNew = Math.min(50, etpdNec);
+  const dgpNew = Math.min(50, Math.max(dgpActuel * 100, Math.round(dgpCible * 100 / 5) * 5));
+  setN('N-etpd', etpdNew); setN('N-dgp', dgpNew);
+  const capSim = (etpdNew * 22 + gp * dgpNew / 100 * 22) * Math.max(0.5, 1 - abs * 0.7);
+  const durSim = Math.round(jhTotal / Math.max(1, capSim) * coefEng * 10) / 10 + (nmMad > 0 ? 1 : 0);
+  const axeOpt = durSim <= delai * 0.85 ? 'ambitieux' : durSim <= delai ? 'standard' : 'prudent';
+  _SC = axeOpt; CALC();
+  const durNouv = window._CALC_STATE['dur_' + axeOpt] || window._CALC_STATE.dur_s;
+  const faisable = durNouv <= delai;
+  document.getElementById('O-mr-title').innerHTML = `<span style="font-size:16px">✦</span> ${faisable ? 'Optimisation réussie — délai respecté' : 'Délai approché au maximum'}`;
+  document.getElementById('O-mr-grid').innerHTML = [
+    {l: 'Durée estimée', v: FN(durNouv) + ' mois', o: FN(durActuelle) + ' mois avant', ok: faisable},
+    {l: 'ETP dédiés', v: etpdNew + ' ETP', o: FN(etpdActuel) + ' ETP avant', ok: etpdNew > etpdActuel},
+    {l: 'Dispo GP', v: dgpNew + '%', o: FN(Math.round(dgpActuel * 100)) + '% avant', ok: dgpNew > Math.round(dgpActuel * 100)},
+    {l: 'Axe', v: axeOpt, o: '', ok: true},
+    {l: 'Capacité', v: window._CALC_STATE.cap + ' j/mois', o: S.cap + ' j/mois avant', ok: window._CALC_STATE.cap > S.cap},
+    {l: 'Délai cible', v: FN(delai) + ' mois', o: '', ok: faisable}
+  ].map(c => `<div class="mr-card"><div class="ml">${c.l}</div><div class="mv" style="color:${c.ok ? 'var(--tx-ok)' : 'var(--tx-wa)'}">${c.v}</div><div class="mo">${c.o}</div></div>`).join('');
+  document.getElementById('O-mr-detail').textContent = faisable
+    ? `Plan optimal : axe ${axeOpt} avec ${etpdNew} ETP dédiés et ${dgpNew}% dispo GP → ${FN(durNouv)} mois.\nRessources à présenter aux dirigeants : ${etpdNew} ETP dédiés + ${FN(Math.round(gp * dgpNew / 100 * 10) / 10)} ETP eq. GP (${gp} GP à ${dgpNew}% de leur temps).`
+    : `Délai de ${FN(delai)} mois très contraint pour ${_STATS ? FMN(_STATS.mig.length) : '?'} dossiers migrables.\nOptions : (1) Réduire périmètre vague 1, (2) Augmenter ressources, (3) Réviser le délai à ${FN(durNouv)} mois.`;
+  r.style.display = 'block';
+  document.querySelectorAll('.nav button').forEach(b => { if (b.textContent.includes('ROI')) b.click(); });
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+(function() {
+  const now = new Date();
+  const ds = document.getElementById('I-dstart');
+  const de = document.getElementById('I-dend');
+  if (ds) ds.value = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString().split('T')[0];
+  calcROI();
+  if (de) de.value = new Date(now.getFullYear() + 1, 2, 31).toISOString().split('T')[0];
+  // Activer option recetter par défaut
+  const row = document.getElementById('OPT-recetter');
+  if (row) row.classList.add('active');
+  CALC();
+})();
+
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+// ═══════════════════════════════════════════════════════
+// GRILLES TARIFAIRES
+// ═══════════════════════════════════════════════════════
+const WAGYZ_PALIERS = [
+  {lo:100001,hi:999999999,t:1.95},{lo:50000,hi:99999,t:2.25},
+  {lo:25000,hi:49999,t:2.65},{lo:10000,hi:24999,t:2.95},
+  {lo:5000,hi:9999,t:3.35},{lo:1000,hi:4999,t:3.65},{lo:0,hi:999,t:3.95}
+];
+// SILAE_GRILLE[i] = [vol_min, vol_max, t26_s, t26_m, t26_l, t27_s, t27_m, t27_l]
+const SILAE_GRILLE = [
+  [1,499,4.65,4.85,3.05,5.60,5.95,3.60],[500,999,4.60,4.80,3.00,5.55,5.90,3.55],
+  [1000,1499,4.55,4.70,3.00,5.45,5.80,3.50],[1500,1999,4.50,4.65,2.95,5.40,5.75,3.45],
+  [2000,2499,4.40,4.55,2.90,5.30,5.65,3.40],[2500,2999,4.30,4.50,2.85,5.20,5.50,3.30],
+  [3000,3999,4.20,4.40,2.75,5.10,5.40,3.25],[4000,4999,4.15,4.30,2.70,4.95,5.30,3.20],
+  [5000,7499,4.05,4.20,2.65,4.85,5.15,3.10],[7500,9999,3.95,4.10,2.60,4.75,5.05,3.05],
+  [10000,14999,3.85,4.00,2.50,4.65,4.95,2.95],[15000,19999,3.75,3.90,2.45,4.50,4.80,2.90],
+  [20000,24999,3.65,3.80,2.40,4.40,4.70,2.80],[25000,29999,3.55,3.70,2.35,4.30,4.55,2.75],
+  [30000,39999,3.50,3.60,2.30,4.20,4.45,2.70],[40000,999999,3.40,3.50,2.20,4.05,4.35,2.60]
+];
+
+function getTarifWagyz(bp) {
+  for(const p of WAGYZ_PALIERS){ if(bp>=p.lo && bp<=p.hi) return p.t; }
+  return 3.95;
+}
+function getSilaeLigne(bp) {
+  for(const g of SILAE_GRILLE){ if(bp>=g[0] && bp<=g[1]) return g; }
+  return SILAE_GRILLE[SILAE_GRILLE.length-1];
+}
+function coutSilae(bpTotal, bpS, bpM, bpL, annee) {
+  // annee: 0=2026, 1=2027
+  const g = getSilaeLigne(bpTotal);
+  const off = annee === 0 ? 2 : 5; // offset dans le tableau
+  return bpS*g[off] + bpM*g[off+1] + bpL*g[off+2];
+}
+function fmtEur(v) { return Math.round(v).toLocaleString('fr-FR') + ' €'; }
+function fmtEurK(v) { if(Math.abs(v)>=1000) return (v/1000).toFixed(1).replace('.',',') + ' k€'; return Math.round(v) + ' €'; }
+
+// ═══════════════════════════════════════════════════════
+// AUTO-REMPLISSAGE DEPUIS LES DONNÉES IMPORTÉES
+// ═══════════════════════════════════════════════════════
+function roiAutoFill() {
+  if (!_STATS || !_DOSSIERS || _DOSSIERS.length === 0) return;
+  
+  // Calculer le total BP depuis les données réelles
+  // On utilise nb_sal comme proxy pour les BP (1 salarié = 1 BP/mois en moyenne)
+  let bpS=0, bpM=0, bpL=0;
+  for(const d of _DOSSIERS) {
+    if(d.nbSal <= 9)       bpS += d.nbSal;
+    else if(d.nbSal <= 249) bpM += d.nbSal;
+    else                    bpL += d.nbSal;
+  }
+  const bpTotal = bpS + bpM + bpL;
+  if(bpTotal > 0) {
+    const inp = document.getElementById('ROI-bp-total');
+    if(inp) inp.value = bpTotal;
+    const inpS = document.getElementById('ROI-bp-s');
+    const inpM = document.getElementById('ROI-bp-m');
+    const inpL = document.getElementById('ROI-bp-l');
+    if(inpS) inpS.value = bpS;
+    if(inpM) inpM.value = bpM;
+    if(inpL) inpL.value = bpL;
+    
+    const note = document.getElementById('O-roi-import-note');
+    if(note) { note.className='al ok'; note.textContent=`✅ Données importées automatiquement — ${bpTotal.toLocaleString('fr-FR')} BP/mois total (${_DOSSIERS.length} dossiers · col. Silae calculée par taille réelle).`; }
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// CALCUL ROI PRINCIPAL
+// ═══════════════════════════════════════════════════════
+function calcROI() {
+  const bpTotal = parseInt(document.getElementById('ROI-bp-total')?.value) || 7500;
+  const bpS     = parseInt(document.getElementById('ROI-bp-s')?.value) || 0;
+  const bpM     = parseInt(document.getElementById('ROI-bp-m')?.value) || 0;
+  const bpL     = parseInt(document.getElementById('ROI-bp-l')?.value) || 0;
+  const startMois = parseInt(document.getElementById('ROI-start-mois')?.value) || 13;
+  const axe     = document.getElementById('ROI-axe')?.value || 'standard';
+
+  // Vérification cohérence BP
+  const bpSomme = bpS + bpM + bpL;
+  const warn = document.getElementById('ROI-bp-warn');
+  if(warn) warn.style.display = Math.abs(bpSomme - bpTotal) > 10 ? 'block' : 'none';
+
+  // % par colonne
+  const setSEL = (id, v, tot) => { const e=document.getElementById(id); if(e) e.textContent = tot>0 ? Math.round(v/tot*100)+'% du total BP' : '—'; };
+  setSEL('ROI-bp-s-pct', bpS, bpSomme);
+  setSEL('ROI-bp-m-pct', bpM, bpSomme);
+  setSEL('ROI-bp-l-pct', bpL, bpSomme);
+
+  // Tarifs de référence
+  const tw   = getTarifWagyz(bpTotal);
+  const gSilae = getSilaeLigne(bpTotal);
+  const ts26s=gSilae[2], ts26m=gSilae[3], ts26l=gSilae[4];
+  const ts27s=gSilae[5], ts27m=gSilae[6], ts27l=gSilae[7];
+
+  // Coûts mensuels de référence
+  const cSilae26 = bpS*ts26s + bpM*ts26m + bpL*ts26l;
+  const cSilae27 = bpS*ts27s + bpM*ts27m + bpL*ts27l;
+  const cWagyz   = bpTotal * tw;
+  const hausse   = cSilae27 - cSilae26;
+  const ecoMois  = cSilae27 - cWagyz;
+
+  // Mise à jour des cartes de référence
+  const s = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v; };
+  s('ROI-silae26-mois', fmtEur(cSilae26));
+  s('ROI-silae27-mois', fmtEur(cSilae27));
+  s('ROI-wagyz-mois',   fmtEur(cWagyz));
+  s('ROI-eco-mois',     fmtEur(ecoMois));
+  s('ROI-eco-pct',      Math.round(ecoMois/cSilae27*100)+'% d'économie vs Silae 2027');
+  s('ROI-wagyz-palier', `Palier ${bpTotal.toLocaleString('fr-FR')} BP → ${tw.toFixed(2).replace('.',',')} €/BP`);
+  s('ROI-wagyz-detail', `→ Votre tarif Wagyz : ${tw.toFixed(2).replace('.',',')} €/BP (fixe 3 ans)`);
+  s('ROI-hausse-mois',  '+' + fmtEur(hausse));
+  s('ROI-hausse-an',    '+' + fmtEur(hausse * 12));
+  s('ROI-eco-an27',     fmtEur(ecoMois * 12));
+  s('ROI-silae-ligne-lbl', `Ligne tarifaire : ${bpTotal.toLocaleString('fr-FR')} BP/mois cabinet`);
+  s('ROI-ts26s', ts26s.toFixed(2).replace('.',',') + ' €');
+  s('ROI-ts26m', ts26m.toFixed(2).replace('.',',') + ' €');
+  s('ROI-ts26l', ts26l.toFixed(2).replace('.',',') + ' €');
+  s('ROI-ts27s', ts27s.toFixed(2).replace('.',',') + ' €');
+  s('ROI-ts27m', ts27m.toFixed(2).replace('.',',') + ' €');
+  s('ROI-ts27l', ts27l.toFixed(2).replace('.',',') + ' €');
+  s('ROI-tsh-s', '+' + ((ts27s-ts26s)/ts26s*100).toFixed(0) + '%');
+  s('ROI-tsh-m', '+' + ((ts27m-ts26m)/ts26m*100).toFixed(0) + '%');
+  s('ROI-tsh-l', '+' + ((ts27l-ts26l)/ts26l*100).toFixed(0) + '%');
+
+  // BP migrables (depuis l'analyse ou 30% par défaut)
+  let bpMigrables = bpTotal * 0.30;
+  if(_STATS && _DOSSIERS) {
+    const mig = _DOSSIERS.filter(d=>d.vague!=='NM');
+    let bms=0,bmm=0,bml=0;
+    for(const d of mig){
+      if(d.nbSal<=9) bms+=d.nbSal; else if(d.nbSal<=249) bmm+=d.nbSal; else bml+=d.nbSal;
+    }
+    bpMigrables = bms+bmm+bml;
+  }
+
+  // Durée de migration selon axe
+  const dureeVague = {prudent:6, standard:4, ambitieux:3}[axe] || 4;
+  const nbVagues = 3;
+  const dureeTotaleMois = dureeVague * nbVagues;
+
+  // ── TABLEAU MENSUEL ──
+  // Période : juillet 2026 (mois 7) → décembre 2027 (mois 18)
+  // mois 1-6 = jan-jun 2026 (pas dans le tableau, démarrage min juillet)
+  // startMois : 7 = jul 2026, 13 = jan 2027, etc.
+  const MOIS_LIBELLES = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  const DEBUT_TAB = 7;  // juillet 2026
+  const FIN_TAB   = 18; // décembre 2027
+
+  const tbody = document.getElementById('ROI-table-body');
+  const tfoot = document.getElementById('ROI-table-foot');
+  if(!tbody) return;
+
+  let gainCumul = 0;
+  let rows = '';
+  let total26_silae=0, total26_reel=0, total27_silae=0, total27_reel=0;
+
+  for(let m = DEBUT_TAB; m <= FIN_TAB; m++) {
+    const annee = m <= 12 ? 2026 : 2027;
+    const moisIdx = (m-1) % 12; // 0-11
+    const libMois = MOIS_LIBELLES[moisIdx] + ' ' + annee;
+    const anneeIdx = annee === 2026 ? 0 : 1;
+
+    // Progression migration : commence à startMois, dure dureeTotaleMois
+    let pctMig = 0;
+    if(m >= startMois && m < startMois + dureeTotaleMois) {
+      pctMig = (m - startMois + 1) / dureeTotaleMois;
+    } else if(m >= startMois + dureeTotaleMois) {
+      pctMig = 1.0;
+    }
+    const bpWagyz = Math.round(bpMigrables * pctMig);
+    const bpSilaeRes = bpTotal - bpWagyz;
+
+    // Coût Wagyz ce mois (tarif fixé sur volume total final)
+    const cW = bpWagyz * tw;
+
+    // Coût Silae résiduel : tarif selon volume TOTAL cabinet (Silae lit le total partenaire)
+    // Répartition proportionnelle des typologies sur le résiduel
+    const ratio = bpSilaeRes / bpTotal;
+    const bpSr = Math.round(bpS * ratio), bpMr = Math.round(bpM * ratio), bpLr = Math.round(bpL * ratio);
+    const cSr = bpSr*(anneeIdx===0?ts26s:ts27s) + bpMr*(anneeIdx===0?ts26m:ts27m) + bpLr*(anneeIdx===0?ts26l:ts27l);
+
+    const cTotal = cW + cSr;
+    const cSansMig = anneeIdx===0 ? cSilae26 : cSilae27;
+    const gainMois = cSansMig - cTotal;
+    gainCumul += gainMois;
+
+    if(annee===2026){ total26_silae+=cSansMig; total26_reel+=cTotal; }
+    else            { total27_silae+=cSansMig; total27_reel+=cTotal; }
+
+    // Couleur de ligne
+    const isMig = pctMig > 0;
+    const isFull = pctMig >= 1;
+    const bgRow = isFull ? '#f0faf5' : isMig ? '#f0f5ff' : annee===2027?'#fdf0f0':'';
+    const fgGain = gainMois > 0 ? '#0F6E56' : '#9B1C1C';
+
+    rows += `<tr style="background:${bgRow}">
+      <td style="padding:5px 9px;font-weight:${annee===2027?'700':'400'};white-space:nowrap">${libMois}</td>
+      <td style="padding:5px 9px;text-align:right;color:#185FA5;font-weight:${bpWagyz>0?'600':'400'}">${bpWagyz>0?bpWagyz.toLocaleString('fr-FR'):'—'}</td>
+      <td style="padding:5px 9px;text-align:right;color:${bpSilaeRes<bpTotal?'#9B1C1C':'#555'}">${bpSilaeRes.toLocaleString('fr-FR')}</td>
+      <td style="padding:5px 9px;text-align:right;color:#185FA5;font-weight:${cW>0?'600':'400'}">${cW>0?fmtEur(cW):'—'}</td>
+      <td style="padding:5px 9px;text-align:right;color:#9B1C1C">${fmtEur(cSr)}</td>
+      <td style="padding:5px 9px;text-align:right;font-weight:700">${fmtEur(cTotal)}</td>
+      <td style="padding:5px 9px;text-align:right;color:#9B1C1C">${fmtEur(cSansMig)}</td>
+      <td style="padding:5px 9px;text-align:right;font-weight:700;color:${fgGain}">${gainMois>=0?'+':''}${fmtEur(gainMois)}</td>
+      <td style="padding:5px 9px;text-align:right;font-weight:700;color:${gainCumul>=0?'#0F6E56':'#9B1C1C'}">${gainCumul>=0?'+':''}${fmtEur(gainCumul)}</td>
+    </tr>`;
+  }
+
+  tbody.innerHTML = rows;
+
+  // Totaux annuels en pied de tableau
+  const ganTotal27 = total27_silae - total27_reel;
+  tfoot.innerHTML = `
+    <tr style="background:#1a1a1a;color:#fff;font-weight:700">
+      <td style="padding:6px 9px">Total 2026 (jul-déc)</td>
+      <td colspan="2" style="padding:6px 9px;text-align:right"></td>
+      <td colspan="2" style="padding:6px 9px;text-align:right">Réel : ${fmtEur(total26_reel)}</td>
+      <td style="padding:6px 9px;text-align:right">${fmtEur(total26_reel)}</td>
+      <td style="padding:6px 9px;text-align:right">${fmtEur(total26_silae)}</td>
+      <td colspan="2" style="padding:6px 9px;text-align:right;color:#4ade80">Gain : ${fmtEur(total26_silae-total26_reel)}</td>
+    </tr>
+    <tr style="background:#0F6E56;color:#fff;font-weight:700;font-size:12px">
+      <td style="padding:7px 9px">TOTAL 2027</td>
+      <td colspan="2" style="padding:7px 9px;text-align:right"></td>
+      <td colspan="2" style="padding:7px 9px;text-align:right">Réel : ${fmtEur(total27_reel)}</td>
+      <td style="padding:7px 9px;text-align:right">${fmtEur(total27_reel)}</td>
+      <td style="padding:7px 9px;text-align:right">${fmtEur(total27_silae)}</td>
+      <td colspan="2" style="padding:7px 9px;text-align:right;color:#bbf7d0">ÉCONOMIE : ${fmtEur(ganTotal27)}</td>
+    </tr>`;
+
+  // ── GRAPHIQUE VISUEL ──
+  const chart = document.getElementById('ROI-chart');
+  if(chart) {
+    const MOIS = [];
+    const valSilae=[], valReel=[], valGain=[];
+    let gc2=0;
+    for(let m=DEBUT_TAB; m<=FIN_TAB; m++){
+      const annee=m<=12?2026:2027, moisIdx=(m-1)%12, anneeIdx=annee===2026?0:1;
+      MOIS.push(MOIS_LIBELLES[moisIdx].substring(0,3)+"'"+(annee+'').substring(2));
+      let pctMig=0;
+      if(m>=startMois&&m<startMois+dureeTotaleMois) pctMig=(m-startMois+1)/dureeTotaleMois;
+      else if(m>=startMois+dureeTotaleMois) pctMig=1.0;
+      const bpW=Math.round(bpMigrables*pctMig), bpSr=bpTotal-bpW;
+      const ratio=bpSr/bpTotal;
+      const cW=bpW*tw;
+      const bpSrd=Math.round(bpS*ratio),bpMrd=Math.round(bpM*ratio),bpLrd=Math.round(bpL*ratio);
+      const cSr=bpSrd*(anneeIdx===0?ts26s:ts27s)+bpMrd*(anneeIdx===0?ts26m:ts27m)+bpLrd*(anneeIdx===0?ts26l:ts27l);
+      const cSansMig=anneeIdx===0?cSilae26:cSilae27;
+      const cTotal=cW+cSr;
+      const gainM=cSansMig-cTotal; gc2+=gainM;
+      valSilae.push(Math.round(cSansMig));
+      valReel.push(Math.round(cTotal));
+      valGain.push(Math.round(gc2));
+    }
+    const maxV = Math.max(...valSilae)*1.08;
+    const h=200, w_bar=100/MOIS.length;
+    let svgBars='', svgLines='', svgGain='';
+    for(let i=0;i<MOIS.length;i++){
+      const x=i/MOIS.length*100;
+      const hS=valSilae[i]/maxV*h, hR=valReel[i]/maxV*h;
+      svgBars+=`<rect x="${x+0.3}%" y="${h-hS}px" width="${w_bar*0.45}%" height="${hS}px" fill="#E24B4A" opacity="0.7"/>`;
+      svgBars+=`<rect x="${x+w_bar*0.5}%" y="${h-hR}px" width="${w_bar*0.45}%" height="${hR}px" fill="#185FA5" opacity="0.85"/>`;
+      if(i===0||i===MOIS.length-1||i===6){
+        svgBars+=`<text x="${x+w_bar*0.5}%" y="${h+14}" text-anchor="middle" font-size="9" fill="#555">${MOIS[i]}</text>`;
+      }
+    }
+    // Ligne gain cumulé
+    const gainMax=Math.max(...valGain,1),gainMin=Math.min(...valGain,0);
+    const gainRange=gainMax-gainMin||1;
+    for(let i=0;i<MOIS.length;i++){
+      const x=(i/(MOIS.length-1)*92)+4;
+      const y=h-((valGain[i]-gainMin)/gainRange*(h*0.6)+h*0.1);
+      svgLines+=i===0?`M${x},${y}`:`L${x},${y}`;
+    }
+    chart.innerHTML=`<div style="font-size:10px;color:var(--cts);margin-bottom:4px;display:flex;gap:12px;flex-wrap:wrap">
+      <span>🟥 Coût Silae sans migration</span><span>🟦 Coût réel avec migration</span><span>🟢 Gain cumulé (axe droite)</span>
+    </div>
+    <svg viewBox="0 0 100% ${h+30}" style="width:100%;height:${h+30}px;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+      ${svgBars}
+      <polyline points="${MOIS.map((_,i)=>`${(i/(MOIS.length-1)*92+4)}%,${h-((valGain[i]-gainMin)/gainRange*(h*0.6)+h*0.1)}px`).join(' ')}" fill="none" stroke="#1D9E75" stroke-width="2" stroke-dasharray="${valGain[0]<0?'4,3':''}"/>
+    </svg>`;
+  }
+
+  // ── SYNTHÈSE 2027 ──
+  const ecoPct27 = total27_silae>0 ? Math.round((total27_silae-total27_reel)/total27_silae*100) : 0;
+  s('ROI-synth-silae', fmtEurK(total27_silae));
+  s('ROI-synth-reel',  fmtEurK(total27_reel));
+  s('ROI-synth-eco',   fmtEurK(total27_silae-total27_reel));
+  const dureeLabel = {prudent:'Prudent (18 mois)',standard:'Standard (12 mois)',ambitieux:'Ambitieux (9 mois)'}[axe];
+  const startLabel = startMois<=12 ? `${MOIS_LIBELLES[startMois-1]} 2026` : `${MOIS_LIBELLES[(startMois-1)%12]} 2027`;
+  s('ROI-synth-texte',
+    `Axe de migration : ${dureeLabel} · Démarrage : ${startLabel}
+` +
+    `${bpMigrables.toLocaleString('fr-FR')} BP migrés sur Wagyz au terme de la migration (sur ${bpTotal.toLocaleString('fr-FR')} BP totaux).
+` +
+    `Hausse Silae 2026→2027 : +${fmtEur(hausse)}/mois (+${Math.round(hausse/cSilae26*100)}%) — tarif fixe Wagyz : ${tw.toFixed(2).replace('.',',')} €/BP.
+` +
+    `Économie 2027 avec migration : ${fmtEurK(total27_silae-total27_reel)} (${ecoPct27}% du coût Silae sans migration).
+` +
+    (total27_silae-total27_reel < 0 ? '⚠ Migration partielle — le double coût dépasse le gain sur 2027. Accélérer la migration pour maximiser l'économie.' :
+    '✅ La migration génère une économie nette dès 2027 malgré le double coût pendant la phase de transition.')
+  );
+}
+
+// Appeler calcROI quand on arrive sur l'onglet ROI
+const _origSW = SW;
+// Appel initial et après analyse
+function initROI() { roiAutoFill(); calcROI(); }
+</script>
+</body>
+</html>
